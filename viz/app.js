@@ -185,7 +185,7 @@
   }
   $("readoff").textContent = `Leído de la red: a = ${num(P.a)}, b = ${num(P.b)}, e = ${num(P.e)} (mismo lado ${num(P.e_same)}, lado cruzado ${num(P.e_cross)}). ` +
     `Baja b y mira cómo se estrechan las líneas rojas del mapa.`;
-  $("foot").textContent = `// Datos: viz/data.js, generado por scripts/build_viz.py el ${D.generated} (commit ${D.commit}). ` +
+  $("foot").textContent = `// Datos: viz/data.js, generado por scripts/build_viz.py el ${D.generated} (generado sobre el commit ${D.commit}). ` +
     `Estimación por los ${D.exact.mechanism_cones} conos de los mecanismos: ${pct(D.exact.mechanism_estimate)} frente al acierto exacto ${pct(D.exact.model_accuracy)}. ` +
     `Tras cada cambio: uv run python scripts/build_viz.py y recarga.`;
 
