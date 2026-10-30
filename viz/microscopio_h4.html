@@ -1,0 +1,333 @@
+<title>Microscopio argmedian h=4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,700;1,500&family=Public+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a lab bench. One column of instrument panels; controls left, readout right on wide screens. */
+:root {
+  --bg: #eef1ee;          /* slide glass */
+  --panel: #f8faf8;
+  --ink: #18222b;
+  --muted: #5b6770;
+  --rule: #cfd6d2;
+  --brass: #a8741a;       /* lens brass: the accent */
+  --on: #c98a1c;
+  --x1: #2a78d6; --x2: #eb6834; --x3: #1baf7a;
+  --wrong: #121212;
+  --good: #1f7a4a; --bad: #b3261e;
+  --f-display: "Spectral", Georgia, serif;
+  --f-body: "Public Sans", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12181c; --panel: #192126; --ink: #e6ece8; --muted: #9aa7a4; --rule: #2c373c;
+  --brass: #d9a443; --on: #e0a640; --x1: #3987e5; --x2: #d95926; --x3: #199e70;
+  --wrong: #f2f2ee; --good: #5cc18a; --bad: #ef7b72; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12181c; --panel: #192126; --ink: #e6ece8; --muted: #9aa7a4; --rule: #2c373c;
+  --brass: #d9a443; --on: #e0a640; --x1: #3987e5; --x2: #d95926; --x3: #199e70;
+  --wrong: #f2f2ee; --good: #5cc18a; --bad: #ef7b72; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px; }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 22px; }
+h1 { font: 700 2.1rem/1.1 var(--f-display); margin: 0; text-wrap: balance; }
+h1 em { color: var(--brass); font-style: italic; font-weight: 500; }
+h2 { font: 700 1.3rem/1.2 var(--f-display); margin: 0; }
+.lede { max-width: 68ch; color: var(--muted); margin: 6px 0 0; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.eyebrow { font: 600 .72rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--brass); }
+.cols { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 820px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.ctrl { display: grid; gap: 10px; }
+.row { display: grid; grid-template-columns: 2.2em 1fr 4.6em; gap: 8px; align-items: center; }
+.row label { font: 600 .95rem var(--f-mono); }
+input[type=range] { width: 100%; accent-color: var(--brass); }
+input[type=number] { width: 100%; font: .85rem var(--f-mono); background: var(--bg); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 3px 4px; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+button { font: 600 .82rem var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
+button:hover { border-color: var(--brass); }
+button[aria-pressed="true"] { background: var(--brass); border-color: var(--brass); color: var(--panel); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.hint { font-size: .82rem; color: var(--muted); }
+.design { display: grid; gap: 8px; padding-top: 6px; border-top: 1px dashed var(--rule); }
+.design[aria-disabled="true"] { opacity: .45; }
+table.steps { border-collapse: collapse; width: 100%; font: .85rem var(--f-mono); font-variant-numeric: tabular-nums; }
+.steps th, .steps td { padding: 5px 6px; text-align: center; border-bottom: 1px solid var(--rule); }
+.steps th { font: 600 .72rem var(--f-mono); color: var(--muted); letter-spacing: .04em; }
+.steps td.n { position: relative; }
+.steps td.n span { position: relative; }
+.steps td.n::before { content: ""; position: absolute; inset: 3px; border-radius: 5px; background: var(--on); opacity: var(--a, 0); }
+.steps .half { color: var(--muted); }
+.steps .sep { border-left: 2px solid var(--rule); }
+.scroll { overflow-x: auto; }
+.logits { display: grid; gap: 6px; }
+.lrow { display: grid; grid-template-columns: 2.4em 1fr 5.2em; gap: 8px; align-items: center; font: .85rem var(--f-mono); font-variant-numeric: tabular-nums; }
+.track { position: relative; height: 16px; background: var(--bg); border-radius: 4px; }
+.track .zero { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--muted); }
+.track .bar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.verdict { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; font-size: .95rem; }
+.pill { font: 600 .8rem var(--f-mono); padding: 2px 9px; border-radius: 999px; border: 1px solid currentColor; }
+.ok { color: var(--good); } .ko { color: var(--bad); }
+.mapbox { display: grid; gap: 8px; min-width: 0; }
+canvas#map { width: 100%; height: auto; aspect-ratio: 2 / 1; max-width: 100%; border-radius: 6px; cursor: crosshair; display: block; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); }
+.sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+svg text { fill: var(--muted); font: 11px var(--f-mono); }
+.gloss { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 22px; font-size: .88rem; }
+.gloss b { font-family: var(--f-mono); color: var(--brass); }
+.facts { font: .82rem var(--f-mono); color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Leeuwenhoek · AlgZoo · argmedian h=4 L=3 · 32 parámetros</div>
+    <h1>Microscopio <em>argmedian h=4</em></h1>
+    <p class="lede">Mueve los tres números y mira qué hace la red por dentro en cada paso. El mapa de abajo enseña todas las direcciones de entrada a la vez: color = respuesta de la red, negro = error. Puedes cambiar entre la red entrenada y el gemelo construido desde la explicación.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="t1">
+    <div class="cols">
+      <div class="ctrl">
+        <h2 id="t1">Entrada</h2>
+        <div class="seg" role="group" aria-label="Qué red">
+          <button id="m-trained" aria-pressed="true">Red entrenada</button>
+          <button id="m-design" aria-pressed="false">Gemelo diseñado</button>
+        </div>
+        <div class="row"><label for="x1">x₁</label><input id="x1" type="range" min="-2" max="2" step="0.001"><input id="x1n" type="number" step="0.001" aria-label="x1"></div>
+        <div class="row"><label for="x2">x₂</label><input id="x2" type="range" min="-2" max="2" step="0.001"><input id="x2n" type="number" step="0.001" aria-label="x2"></div>
+        <div class="row"><label for="x3">x₃</label><input id="x3" type="range" min="-2" max="2" step="0.001"><input id="x3n" type="number" step="0.001" aria-label="x3"></div>
+        <div class="seg" role="group" aria-label="Ejemplos">
+          <button data-x="0.9,-0.4,0.5">Giro (x₂ mínimo)</button>
+          <button data-x="-0.6,0.1,0.9">Racha que sube</button>
+          <button data-x="1,-0.3,-0.295">Casi empate: banda</button>
+          <button data-x="1,0.7,0.705">Casi empate: estado muerto</button>
+        </div>
+        <div class="design" id="designBox" aria-disabled="true">
+          <div class="eyebrow">Gemelo: los 2 números libres</div>
+          <div class="row"><label for="b">b</label><input id="b" type="range" min="0.02" max="1.5" step="0.01" value="0.743"><input id="bn" type="number" step="0.01" aria-label="b"></div>
+          <div class="row"><label for="e">e</label><input id="e" type="range" min="0.2" max="0.6" step="0.005" value="0.369"><input id="en" type="number" step="0.005" aria-label="e"></div>
+          <p class="hint">b = tamaño de la memoria (con a = 8,673 fijo). e = cuánto olvida. Todo lo demás se deduce de la explicación. Baja b y verás estrecharse las líneas negras.</p>
+        </div>
+      </div>
+
+      <div class="ctrl" style="min-width:0">
+        <h2>Dentro de la red</h2>
+        <div class="scroll">
+          <table class="steps" aria-label="Activaciones por paso">
+            <thead>
+              <tr><th></th><th colspan="2" class="half">mitad + (sube)</th><th colspan="2" class="half sep">mitad − (baja)</th><th colspan="2" class="sep">mitad +</th><th colspan="2">mitad −</th></tr>
+              <tr><th>paso</th><th>n₁</th><th>n₂</th><th class="sep">n₃</th><th>n₄</th><th class="sep">s</th><th>d</th><th>s</th><th>d</th></tr>
+            </thead>
+            <tbody id="steps"></tbody>
+          </table>
+        </div>
+        <p class="hint">Casilla dorada = neurona encendida (salida de la ReLU &gt; 0). s = suma de la pareja (comparación con el valor anterior), d = diferencia (memoria). Fuera de los empates solo se enciende una mitad por paso.</p>
+        <div class="logits" id="logits"></div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t2">
+    <div class="eyebrow">Todas las direcciones a la vez</div>
+    <h2 id="t2">Mapa de la esfera</h2>
+    <p class="hint">Como la red no tiene sesgos, solo importa la dirección de (x₁, x₂, x₃). Cada píxel es una dirección, y todos tienen la misma probabilidad con entradas gaussianas. Horizontal: el orden de los tres números (6 franjas). Vertical: cuánto se parecen entre sí (arriba y abajo, casi iguales). Haz clic para llevar la entrada a ese punto; el círculo marca la entrada actual.</p>
+    <div class="mapbox">
+      <canvas id="map" width="720" height="360" aria-label="Mapa de predicciones sobre la esfera"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--x1)"></i>responde x₁</span>
+        <span><i class="sw" style="background:var(--x2)"></i>responde x₂</span>
+        <span><i class="sw" style="background:var(--x3)"></i>responde x₃</span>
+        <span><i class="sw" style="background:var(--wrong)"></i>error</span>
+        <span id="mapErr"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t3">
+    <div class="eyebrow">Gemelo diseñado</div>
+    <h2 id="t3">Ley del error</h2>
+    <p class="hint">Error exacto de las redes diseñadas (calculado desde los pesos, sin muestrear) según el tamaño de la memoria b/a. La recta es error = 2,023·(b/a)². El rombo es la red entrenada; el círculo hueco, el gemelo con tu b actual.</p>
+    <div class="scroll"><svg id="law" viewBox="0 0 640 300" width="100%" style="max-width:640px" role="img" aria-label="Error frente a b/a en escala logarítmica"></svg></div>
+    <p class="facts">Cifras exactas (scripts/design_twin_h4.py y scripts/exact_accuracy_table.py): red entrenada 98,455 % de acierto; gemelo con b = 0,743 y e = 0,369: 98,516 %, coincide con la red en el 98,76 % de las entradas; con b = 0,02: 99,999 %. El porcentaje del mapa es aproximado: la rejilla no ve franjas más finas que un píxel.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="t4">
+    <h2 id="t4">Vocabulario</h2>
+    <div class="gloss">
+      <div><b>ReLU</b>: deja pasar un número si es positivo y lo pone a 0 si es negativo. Una neurona está «encendida» si su salida es &gt; 0.</div>
+      <div><b>logit</b>: la puntuación de cada posición. La red responde la posición con el logit más alto (si empatan, x₁).</div>
+      <div><b>mitad</b>: las neuronas 1-2 se encienden cuando el valor sube; la 3-4, cuando baja. Son espejo una de otra.</div>
+      <div><b>s y d</b>: suma y diferencia de la pareja encendida. s ≈ 8,67·(x_t − x_{t−1}) compara; d es pequeño y guarda la memoria.</div>
+      <div><b>estado muerto</b>: todas las neuronas a 0 en el último paso. Todos los logits valen 0 y gana x₁ por desempate.</div>
+      <div><b>casi empate</b>: dos valores muy cercanos. La pareja de una mitad se rompe (|s| &lt; |d|) y la red falla, casi siempre respondiendo x₁.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+const TRAINED = {"w_ih": [3.9652628898620605, 4.699488162994385, -4.716319561004639, -3.9652016162872314], "w_hh": [[1.3386871814727783, -2.199573278427124, 2.635197639465332, -1.894750952720642], [1.9277414083480835, -2.4338717460632324, 2.786757469177246, -2.382629871368408], [-2.3876655101776123, 2.805652379989624, -2.4338979721069336, 1.933146357536316], [-1.893122673034668, 2.6428966522216797, -2.1912336349487305, 1.340865969657898]], "w_out": [[-1.671844720840454, 1.599316120147705, 1.6174601316452026, -1.6575409173965454], [-18.74772834777832, 15.999290466308594, 15.9591703414917, -18.724285125732422], [11.430537223815918, -15.74033260345459, -15.697331428527832, 11.476856231689453]]};
+// Exact errors of designed nets, from scripts/design_twin_h4.py (a = 8.673, e = 0.369)
+const LAW_POINTS = [[0.0023, 0.00107], [0.0058, 0.00671], [0.0115, 0.02686], [0.0231, 0.10745], [0.0346, 0.24180], [0.0576, 0.67199]];
+const LAW_K = 2.023, A = 8.673, B2 = 15.72, B3 = 15.22;
+const TRAINED_POINT = [0.0856, 1.5450];
+
+// (n1..n4) <-> (s+, d+, s-, d-), as in src/leeuwenhoek/design.py
+const BM = [[1,1,0,0],[-1,1,0,0],[0,0,1,1],[0,0,1,-1]];
+const BI = [[.5,-.5,0,0],[.5,.5,0,0],[0,0,.5,.5],[0,0,.5,-.5]];
+const mm = (X, Y) => X.map(r => Y[0].map((_, j) => r.reduce((s, v, k) => s + v * Y[k][j], 0)));
+const mv = (X, v) => X.map(r => r.reduce((s, a, k) => s + a * v[k], 0));
+
+function designed(b, e) {
+  const a = A, c = b * (1 - e + e * e) / (e * a), g = c * a - e * b, q = a / (g + b), p = q * g / a;
+  const S = [[-p, -q], [c, -e]], C = [[p, q], [-c, e]];
+  const Wsd = [[...S[0], ...C[0]], [...S[1], ...C[1]], [...C[0], ...S[0]], [...C[1], ...S[1]]];
+  const alpha = [0, -B2 * b / a, -B3 * g / a], beta = [0, B2, -B3];
+  const Usd = [0, 1, 2].map(k => [alpha[k], beta[k], alpha[k], beta[k]]);
+  return { w_ih: mv(BI, [a, b, -a, -b]), w_hh: mm(mm(BI, Wsd), BM), w_out: mm(Usd, BM) };
+}
+
+function forward(w, x) {
+  let h = [0, 0, 0, 0]; const hs = [];
+  for (let t = 0; t < 3; t++) {
+    h = w.w_hh.map((r, i) => Math.max(0, w.w_ih[i] * x[t] + r[0] * h[0] + r[1] * h[1] + r[2] * h[2] + r[3] * h[3]));
+    hs.push(h);
+  }
+  return { hs, logits: w.w_out.map(r => r[0] * h[0] + r[1] * h[1] + r[2] * h[2] + r[3] * h[3]) };
+}
+const argmax = v => v.reduce((bi, x, i) => (x > v[bi] ? i : bi), 0);
+const median = x => [0, 1, 2].sort((i, j) => x[i] - x[j])[1];
+
+// sphere coordinates (src/leeuwenhoek/sphere.py)
+const E1 = [1 / Math.SQRT2, -1 / Math.SQRT2, 0], E2 = [1 / Math.sqrt(6), 1 / Math.sqrt(6), -2 / Math.sqrt(6)], E3 = [1, 1, 1].map(v => v / Math.sqrt(3));
+const dir = (th, z) => { const r = Math.sqrt(1 - z * z); return [0, 1, 2].map(i => r * (Math.cos(th) * E1[i] + Math.sin(th) * E2[i]) + z * E3[i]); };
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
+const $ = id => document.getElementById(id);
+const state = { model: "trained", x: [0.9, -0.4, 0.5], b: 0.743, e: 0.369 };
+const weights = () => state.model === "trained" ? TRAINED : designed(state.b, state.e);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = v => (Math.abs(v) < 0.0005 ? "0" : v.toFixed(Math.abs(v) >= 10 ? 1 : 2));
+
+function renderInside() {
+  const w = weights(), { hs, logits } = forward(w, state.x);
+  const max = Math.max(1e-9, ...hs.flat());
+  $("steps").innerHTML = hs.map((h, t) => {
+    const sd = mv(BM, h);
+    const cell = (v, extra = "") => `<td class="n ${extra}" style="--a:${v > 0 ? 0.25 + 0.6 * v / max : 0}"><span>${fmt(v)}</span></td>`;
+    return `<tr><th>${t + 1}</th>${cell(h[0])}${cell(h[1])}${cell(h[2], "sep")}${cell(h[3])}` +
+      `<td class="sep">${fmt(sd[0])}</td><td>${fmt(sd[1])}</td><td>${fmt(sd[2])}</td><td>${fmt(sd[3])}</td></tr>`;
+  }).join("");
+  const pred = argmax(logits), med = median(state.x), lim = Math.max(1e-9, ...logits.map(Math.abs));
+  $("logits").innerHTML = logits.map((l, k) => {
+    const wpc = 50 * Math.abs(l) / lim, left = l >= 0 ? 50 : 50 - wpc;
+    return `<div class="lrow"><span>x${"₁₂₃"[k]}</span><div class="track"><div class="zero"></div>` +
+      `<div class="bar" style="left:${left}%;width:${wpc}%;background:var(--x${k + 1});opacity:${k === pred ? 1 : .45}"></div></div><span>${fmt(l)}</span></div>`;
+  }).join("");
+  const dead = hs[2].every(v => v === 0);
+  $("verdict").innerHTML = `<span>Responde <b>x${"₁₂₃"[pred]}</b>, la mediana es <b>x${"₁₂₃"[med]}</b></span>` +
+    `<span class="pill ${pred === med ? "ok" : "ko"}">${pred === med ? "acierta" : "falla"}</span>` +
+    (dead ? `<span class="hint">estado muerto: todo a 0, gana x₁ por desempate</span>` : "");
+}
+
+const map = $("map"), ctx = map.getContext("2d");
+let mapImage = null;
+function computeMap() {
+  const w = weights(), W = map.width, H = map.height, img = ctx.createImageData(W, H);
+  const hex = n => { const h = css(n).replace("#", ""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); };
+  const cols = [hex("--x1"), hex("--x2"), hex("--x3")], bad = hex("--wrong"), bg = hex("--panel");
+  let wrong = 0;
+  for (let j = 0; j < H; j++) {
+    const z = 1 - (j + 0.5) / H * 2;
+    for (let i = 0; i < W; i++) {
+      const u = dir((i + 0.5) / W * 2 * Math.PI, z), p = argmax(forward(w, u).logits), ok = p === median(u);
+      if (!ok) wrong++;
+      const c = ok ? cols[p].map((v, k) => Math.round(bg[k] + (v - bg[k]) * 0.55)) : bad, o = (j * W + i) * 4;
+      img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
+    }
+  }
+  mapImage = img;
+  $("mapErr").textContent = `error en el mapa ≈ ${(100 * wrong / (W * H)).toFixed(2)} % (aproximado)`;
+}
+function drawMap() {
+  if (!mapImage) computeMap();
+  ctx.putImageData(mapImage, 0, 0);
+  const W = map.width, H = map.height;
+  ctx.strokeStyle = css("--muted"); ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+  for (let k = 0; k < 6; k++) { const xx = (30 + 60 * k) / 360 * W; ctx.beginPath(); ctx.moveTo(xx, 0); ctx.lineTo(xx, H); ctx.stroke(); }
+  ctx.setLineDash([]); ctx.fillStyle = css("--ink"); ctx.font = `600 ${Math.round(W / 55)}px ${css("--f-mono").split(",")[0]}`; ctx.textAlign = "center";
+  for (let k = 0; k < 6; k++) {
+    const u = dir(k * Math.PI / 3, 0), o = [0, 1, 2].sort((i, j) => u[i] - u[j]);
+    ctx.fillText(o.map(i => "x" + (i + 1)).join("<"), (k === 0 ? 0.04 : k / 6) * W, 16);
+  }
+  const n = Math.hypot(...state.x);
+  if (n > 0) {
+    const u = state.x.map(v => v / n), th = (Math.atan2(dot(u, E2), dot(u, E1)) + 2 * Math.PI) % (2 * Math.PI);
+    const px = th / (2 * Math.PI) * W, py = (1 - dot(u, E3)) / 2 * H;
+    ctx.lineWidth = 3; ctx.strokeStyle = css("--panel"); ctx.beginPath(); ctx.arc(px, py, 9, 0, 7); ctx.stroke();
+    ctx.lineWidth = 2; ctx.strokeStyle = css("--brass"); ctx.beginPath(); ctx.arc(px, py, 9, 0, 7); ctx.stroke();
+  }
+}
+map.addEventListener("click", ev => {
+  const r = map.getBoundingClientRect(), th = (ev.clientX - r.left) / r.width * 2 * Math.PI, z = 1 - (ev.clientY - r.top) / r.height * 2;
+  const u = dir(th, Math.max(-0.999, Math.min(0.999, z))), s = 1.8 / Math.max(...u.map(Math.abs));
+  setX(u.map(v => +(v * s).toFixed(3)));
+});
+
+function drawLaw() {
+  const svg = $("law"), L = 56, R = 620, T = 16, Bt = 262;
+  const lx = v => L + (Math.log10(v) - Math.log10(0.002)) / (Math.log10(0.2) - Math.log10(0.002)) * (R - L);
+  const ly = v => Bt - (Math.log10(v) - Math.log10(0.0005)) / (Math.log10(10) - Math.log10(0.0005)) * (Bt - T);
+  let s = "";
+  for (const t of [0.001, 0.01, 0.1, 1, 10]) if (t >= 0.0005) s += `<line x1="${L}" x2="${R}" y1="${ly(t)}" y2="${ly(t)}" stroke="var(--rule)"/><text x="${L - 6}" y="${ly(t) + 4}" text-anchor="end">${t} %</text>`;
+  for (const t of [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]) s += `<text x="${lx(t)}" y="${Bt + 16}" text-anchor="middle">${t}</text>`;
+  s += `<text x="${(L + R) / 2}" y="${Bt + 33}" text-anchor="middle">b / a (tamaño de la memoria)</text>`;
+  const law = v => 100 * LAW_K * v * v;
+  s += `<line x1="${lx(0.002)}" y1="${ly(law(0.002))}" x2="${lx(0.2)}" y2="${ly(Math.min(10, law(0.2)))}" stroke="var(--brass)" stroke-width="2"/>`;
+  for (const [x, y] of LAW_POINTS) s += `<circle cx="${lx(x)}" cy="${ly(y)}" r="5" fill="var(--ink)"/>`;
+  const [tx, ty] = TRAINED_POINT;
+  s += `<rect x="${lx(tx) - 6}" y="${ly(ty) - 6}" width="12" height="12" transform="rotate(45 ${lx(tx)} ${ly(ty)})" fill="var(--bad)"/>` +
+       `<text x="${lx(tx) - 10}" y="${ly(ty) - 12}" text-anchor="end">red entrenada 1,545 %</text>`;
+  const cur = state.b / A;
+  if (state.model === "design" && cur >= 0.002 && cur <= 0.2) s += `<circle cx="${lx(cur)}" cy="${ly(law(cur))}" r="7" fill="none" stroke="var(--brass)" stroke-width="2.5"/>`;
+  svg.innerHTML = s;
+}
+
+function setX(x) {
+  state.x = x;
+  ["x1", "x2", "x3"].forEach((id, i) => { $(id).value = x[i]; $(id + "n").value = x[i]; });
+  renderInside(); drawMap();
+}
+let pending = false;
+function refreshModel() {
+  mapImage = null;
+  if (pending) return; pending = true;
+  requestAnimationFrame(() => { pending = false; renderInside(); computeMap(); drawMap(); drawLaw(); });
+}
+["x1", "x2", "x3"].forEach((id, i) => {
+  $(id).addEventListener("input", () => { const x = [...state.x]; x[i] = +$(id).value; setX(x); });
+  $(id + "n").addEventListener("change", () => { const x = [...state.x]; x[i] = Math.max(-2, Math.min(2, +$(id + "n").value || 0)); setX(x); });
+});
+for (const [id, key] of [["b", "b"], ["e", "e"]]) {
+  $(id).addEventListener("input", () => { state[key] = +$(id).value; $(id + "n").value = state[key]; refreshModel(); });
+  $(id + "n").addEventListener("change", () => { state[key] = +$(id + "n").value; $(id).value = state[key]; refreshModel(); });
+}
+document.querySelectorAll("[data-x]").forEach(btn => btn.addEventListener("click", () => setX(btn.dataset.x.split(",").map(Number))));
+function setModel(m) {
+  state.model = m;
+  $("m-trained").setAttribute("aria-pressed", m === "trained"); $("m-design").setAttribute("aria-pressed", m === "design");
+  $("designBox").setAttribute("aria-disabled", m !== "design");
+  ["b", "bn", "e", "en"].forEach(id => $(id).disabled = m !== "design");
+  refreshModel();
+}
+$("m-trained").addEventListener("click", () => setModel("trained"));
+$("m-design").addEventListener("click", () => setModel("design"));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", refreshModel);
+new MutationObserver(refreshModel).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+$("bn").value = state.b; $("en").value = state.e;
+setModel("trained");
+setX(state.x);
+</script>
