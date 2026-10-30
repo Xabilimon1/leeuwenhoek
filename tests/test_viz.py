@@ -30,6 +30,7 @@ console.log(JSON.stringify({{
   designed: XS.map(x => Model.forward(D, x).logits),
   w_hh: D.w_hh,
   M: Model.pathMatrix(W, [[1,1,0,0],[0,0,1,1],[1,1,0,0]]),
+  fast: XS.map(x => Model.predict(W, x[0], x[1], x[2])),
 }}));
 """
     out = json.loads(subprocess.run(["node", "-e", js], capture_output=True, text=True, check=True).stdout)
@@ -41,3 +42,4 @@ console.log(JSON.stringify({{
     np.testing.assert_allclose(out["w_hh"], d["w_hh"], atol=1e-12)
     M, _ = path_matrices(w64, parse_path("1100-0011-1100"))
     np.testing.assert_allclose(out["M"], M, atol=1e-9)
+    assert out["fast"] == forward(w64, xs).argmax(-1).tolist()

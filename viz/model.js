@@ -43,6 +43,29 @@
     return mm(w.w_out, S);
   }
 
+  // Fast path for drawing maps: the network's answer (0, 1, 2) for one input,
+  // same maths as forward() + argmax(), without allocations.
+  function predict(w, x1, x2, x3) {
+    const n = w.w_ih.length, h = new Float64Array(n), z = new Float64Array(n), xs = [x1, x2, x3];
+    for (let t = 0; t < 3; t++) {
+      for (let i = 0; i < n; i++) {
+        let s = w.w_ih[i] * xs[t];
+        const r = w.w_hh[i];
+        for (let k = 0; k < n; k++) s += r[k] * h[k];
+        z[i] = s > 0 ? s : 0;
+      }
+      h.set(z);
+    }
+    let best = 0, bv = -Infinity;
+    for (let k = 0; k < 3; k++) {
+      let s = 0;
+      const r = w.w_out[k];
+      for (let i = 0; i < n; i++) s += r[i] * h[i];
+      if (s > bv) { bv = s; best = k; }
+    }
+    return best;
+  }
+
   const argmax = (v) => v.reduce((bi, x, i) => (x > v[bi] ? i : bi), 0); // ties -> first, as numpy
   const median = (x) => [0, 1, 2].sort((i, j) => x[i] - x[j])[1];
 
@@ -56,5 +79,5 @@
   };
   const dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
 
-  g.Model = { BM, BI, mv, designed, forward, pathMatrix, argmax, median, direction, dot, E1, E2, E3 };
+  g.Model = { BM, BI, mv, designed, forward, predict, pathMatrix, argmax, median, direction, dot, E1, E2, E3 };
 })(typeof window !== "undefined" ? window : globalThis);

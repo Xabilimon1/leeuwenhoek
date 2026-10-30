@@ -4,96 +4,42 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Leeuwenhoek: argmedian h=4</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400..800;1,400..800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="wrap">
-      <span class="site-title"><span class="site-name">leeuwenhoek</span><span class="site-subject">// argmedian h=4 L=3, 32 parámetros</span></span>
-      <nav class="site-nav" aria-label="Secciones">
-        <a href="#dentro">dentro</a><a href="#esfera">esfera</a><a href="#ley">ley del error</a>
-      </nav>
+  <div class="titlebar">
+    <div class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+    <div class="modes" role="group" aria-label="Red">
+      <button id="m-trained" aria-pressed="true">red entrenada</button>
+      <button id="m-design" aria-pressed="false">red diseñada</button>
     </div>
-  </header>
+    <label class="memory" id="memory" hidden>memoria <input id="b" type="range" min="0.02" max="1.5" step="0.005"></label>
+  </div>
 
-  <main class="page-content">
-    <div class="wrap">
-      <h1 class="page-title">argmedian h=4: dentro de la red</h1>
-      <p class="code-comment">// Elige la red y una entrada. A la derecha, lo que calcula en cada paso: qué neuronas se encienden, en qué camino cae y cómo decide. Abajo, todas las entradas a la vez.</p>
+  <main>
+    <section class="panel">
+      <div class="tabbar"><span class="tab">tres números</span></div>
+      <div class="body"><svg id="line" viewBox="0 0 340 440" aria-label="Los tres números, arrastrables"></svg></div>
+    </section>
 
-      <div class="grid" id="dentro">
-        <div class="col">
-          <section class="panel">
-            <p class="tabbar"><span class="tab">Red</span><span class="tabbar-note">pesos</span></p>
-            <fieldset id="nets"><legend class="sr">Red</legend></fieldset>
-          </section>
-          <section class="panel">
-            <p class="tabbar"><span class="tab">Entrada</span><span class="tabbar-note">x ~ N(0, 1)</span></p>
-            <div class="slider"><label for="x1">x₁</label><input id="x1" type="range" min="-2" max="2" step="0.001"><input id="x1n" type="number" step="0.001" aria-label="x1"></div>
-            <div class="slider"><label for="x2">x₂</label><input id="x2" type="range" min="-2" max="2" step="0.001"><input id="x2n" type="number" step="0.001" aria-label="x2"></div>
-            <div class="slider"><label for="x3">x₃</label><input id="x3" type="range" min="-2" max="2" step="0.001"><input id="x3n" type="number" step="0.001" aria-label="x3"></div>
-            <p class="hint">Escalar los tres números no cambia la respuesta: la red no tiene sesgos. Solo cuenta la dirección.</p>
-          </section>
-          <section class="panel">
-            <p class="tabbar"><span class="tab">Ejemplos</span><span class="tabbar-note">casos típicos</span></p>
-            <fieldset id="examples"><legend class="sr">Ejemplos</legend></fieldset>
-          </section>
-          <section class="panel" id="designPanel" aria-disabled="true">
-            <p class="tabbar"><span class="tab">Gemelo</span><span class="tabbar-note">design.py</span></p>
-            <div class="slider"><label for="b">b</label><input id="b" type="range" min="0.02" max="1.5" step="0.001"><input id="bn" type="number" step="0.001" aria-label="b"></div>
-            <div class="slider"><label for="e">e</label><input id="e" type="range" min="0.2" max="0.6" step="0.001"><input id="en" type="number" step="0.001" aria-label="e"></div>
-            <div class="body"><dl class="kv" id="derived"></dl></div>
-            <p class="hint" id="readoff"></p>
-          </section>
-        </div>
+    <section class="panel">
+      <div class="tabbar"><span class="tab">la red los lee uno a uno</span></div>
+      <div class="body"><svg id="steps" viewBox="0 0 640 440" aria-label="Neuronas encendidas en cada paso"></svg></div>
+    </section>
 
-        <div class="col">
-          <section class="panel">
-            <p class="tabbar"><span class="tab">forward</span><span class="tabbar-note">h_t = relu(w_ih x_t + W_hh h_t-1)</span></p>
-            <div class="body">
-              <div class="hx" id="hx"></div>
-              <div class="hx-sub"><span></span><span>neuronas (valor tras la ReLU)</span><span>canales por mitad</span></div>
-              <p class="note" style="margin-top:8px">// Verde = encendida. s = suma de la pareja: compara con el valor anterior. d = diferencia: la memoria. Fuera de los empates solo se enciende una mitad por paso.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <p class="tabbar"><span class="tab">camino</span><span class="tabbar-note">linear.py</span></p>
-            <div class="body" id="path"></div>
-          </section>
-          <section class="panel">
-            <p class="tabbar"><span class="tab">logits</span><span class="tabbar-note">gana el mayor, empate: x₁</span></p>
-            <div class="body" id="logits"></div>
-          </section>
-        </div>
-      </div>
+    <section class="panel">
+      <div class="tabbar"><span class="tab">qué elige la red</span></div>
+      <div class="body" style="gap:8px"><canvas id="plane" width="720" height="720" aria-label="Respuesta de la red para cada x2 y x3"></canvas></div>
+    </section>
 
-      <div class="wide">
-        <section class="panel" id="esfera">
-          <p class="tabbar"><span class="tab">esfera</span><span class="tabbar-note">sphere.py, igual área</span></p>
-          <div class="body">
-            <canvas id="map" width="720" height="360" aria-label="Respuesta de la red para cada dirección de entrada"></canvas>
-            <div class="legend">
-              <span><i class="sw x1"></i>responde x₁</span><span><i class="sw x2"></i>responde x₂</span><span><i class="sw x3"></i>responde x₃</span><span><i class="sw bad"></i>error</span>
-              <span id="mapErr" class="dim"></span>
-            </div>
-            <p class="note" style="margin-top:8px">// Cada píxel es una dirección, todas con la misma probabilidad. Horizontal: el orden de los tres números (6 franjas, fronteras discontinuas). Vertical: cuánto se parecen (arriba y abajo, casi iguales). Clic para llevar la entrada ahí; el círculo es la entrada actual.</p>
-          </div>
-        </section>
-        <section class="panel" id="ley">
-          <p class="tabbar"><span class="tab">ley del error</span><span class="tabbar-note">redes diseñadas, acierto exacto</span></p>
-          <div class="body">
-            <svg id="law" viewBox="0 0 680 300" width="100%" style="max-width:760px" role="img" aria-label="Error frente a b/a en escala logarítmica"></svg>
-            <p class="note" id="lawNote"></p>
-          </div>
-        </section>
-      </div>
-
-      <p class="demo-foot" id="foot"></p>
-    </div>
+    <section class="panel">
+      <div class="tabbar"><span class="tab">lupa ×25</span></div>
+      <div class="body"><canvas id="loupe" width="720" height="720" aria-label="Ampliación alrededor de la entrada"></canvas></div>
+    </section>
   </main>
+
+  <div class="status" id="status"></div>
 
   <script src="data.js"></script>
   <script src="model.js"></script>
