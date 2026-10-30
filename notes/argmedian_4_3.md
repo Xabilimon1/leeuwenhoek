@@ -23,6 +23,7 @@ Modelo: `zoo_argmedian(4, 3)`, semilla 0 (mejor de 5), acierto medido 98,43 % (s
 Script: `scripts/twins_argmedian_4_3.py` (entradas con semilla 1, no usadas para explorar).
 - Algorítmico limpio: coincidencia 98,46 % (es el argmedian exacto: coincide en todo salvo en los fallos del modelo).
 - Algorítmico + banda de empate en el paso 3 (|x₃−x₂| < 0,013·|x₁| y x₁ extremo → x₁; 0,013 sacado de la matriz del camino): **coincidencia 98,82 %**. Explica ~23 % de las discrepancias; la regla es demasiado tosca (falla donde el modelo acierta: acierto del gemelo 99,41 %).
+- **Algorítmico + banda deducida de los pesos** (`scripts/tie_band.py`, `twins.algorithmic_twin_band`): con x₁ > 0 (espejo) y x₁ = 1 (homogeneidad), v = x₂/x₁, δ = (x₃−x₂)/x₁. La red responde x₁ si δ cae en una banda de bordes rectos sacados de las matrices de los caminos mezclados del paso 3: x₂ < x₁: −0,0104 + 0,0237v < δ < 0,0138 − 0,0240v; x₂ > x₁: 0,0054 − 0,0240v < δ < −0,0196 + 0,0237v. Anchura ≈ 0,048·|v − 0,52|. Precisión 92 % (dentro de la banda la red responde x₁ mal el 92 % de las veces); cubre el 73 % / 63 % de esas respuestas erróneas. **Coincidencia 99,23 %** (semilla 1) y 99,23 % (semilla 2, no usada antes): explica la mitad de lo que faltaba.
 - Pesos con simetría exacta: 99,79 %. Redondeando a 0,01: 98,95 %; a 0,1: 95,78 %; a 0,5: 42,87 %.
 - **La red es frágil**: redondear solo W_hh a 0,1 baja a 94,62 %; solo w_ih, 97,39 %; solo w_out, 99,07 %. Hay compensaciones finas, sobre todo en la recurrencia.
 

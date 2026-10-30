@@ -13,6 +13,7 @@ from collections import Counter
 import numpy as np
 
 from leeuwenhoek.forward import forward
+from leeuwenhoek.linear import parse_path, path_matrices
 from leeuwenhoek.metrics import argmedian_target, gaussian_inputs
 from leeuwenhoek.models import load_argmedian
 
@@ -23,20 +24,6 @@ parser.add_argument("--top", type=int, default=8)
 parser.add_argument("--path", default=None, help="e.g. 1100-0011-1010; default: most common")
 args = parser.parse_args()
 np.set_printoptions(precision=2, suppress=True)
-
-
-def path_matrices(w, masks):
-    """Linear maps for a path. Returns (M, pre) with logits = M @ x and
-    pre[t] (h x 3) the pre-activations at step t as linear functions of x."""
-    w_ih, w_hh, w_out = (w[k].astype(np.float64) for k in ("w_ih", "w_hh", "w_out"))
-    h = np.zeros((len(w_ih), 3))  # state as a linear function of x: h = S @ x
-    pre = []
-    for t, d in enumerate(masks):
-        z = w_hh @ h
-        z[:, t] += w_ih
-        pre.append(z)
-        h = np.diag(d) @ z
-    return w_out @ h, pre
 
 
 _, w = load_argmedian(args.hidden, 3)
@@ -55,7 +42,7 @@ for k, c in counts.most_common(args.top):
     print(f"  {k}: {c / args.n:6.2%}  err {wrong[m].mean():6.2%}  (cumulative {cum / args.n:6.2%})")
 
 top = args.path or counts.most_common(1)[0][0]
-masks = [np.array([int(b) for b in p], float) for p in top.split("-")]
+masks = parse_path(top)
 M, pre = path_matrices(w, masks)
 m = keys == top
 assert np.allclose(x[m] @ M.T, logits[m], atol=1e-3), "path matrix does not reproduce logits"

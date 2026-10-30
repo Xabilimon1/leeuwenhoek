@@ -37,6 +37,25 @@ def algorithmic_twin(x, eps3=0.0):
     return pred
 
 
+def algorithmic_twin_band(x):
+    """Clean algorithm + the step-3 tie band derived in scripts/tie_band.py.
+
+    Mirror to x1 > 0 and scale x1 = 1: v = x2/x1, delta = (x3 - x2)/x1.
+    The model answers x1 when delta falls inside a narrow band whose edges are
+    straight lines in v, read off the mixed step-3 path matrices:
+        x2 < x1:  -0.0104 + 0.0237 v  <  delta  <  0.0138 - 0.0240 v
+        x2 > x1:   0.0054 - 0.0240 v  <  delta  < -0.0196 + 0.0237 v
+    Both bands have width ~0.048 * |v - 0.52|.
+    """
+    pred = algorithmic_twin(x)
+    xs = x * np.sign(x[:, :1])
+    v = xs[:, 1] / xs[:, 0]
+    delta = (xs[:, 2] - xs[:, 1]) / xs[:, 0]
+    down = (v < 1) & (delta > -0.0104 + 0.0237 * v) & (delta < 0.0138 - 0.0240 * v)
+    up = (v > 1) & (delta > 0.0054 - 0.0240 * v) & (delta < -0.0196 + 0.0237 * v)
+    return np.where(down | up, 0, pred)
+
+
 def symmetrize(w):
     """Average the weights with their sign-mirror image, making the symmetry exact."""
     return {
