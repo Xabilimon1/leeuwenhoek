@@ -55,7 +55,7 @@ Técnico y honesto; frases cortas; contar lo que se rompió (la hipótesis de lo
 
 **Frontmatter propuesto**
 ```yaml
-title: "Taking apart a 32-number network"   # provisional, tuyo
+title: "Taking apart a 32-number network"   # elegido por Xabier 2026-10-30
 excerpt: "..."                              # cuando haya boceto
 publishedAt: "YYYY-MM-DD"
 category: "research"
@@ -71,6 +71,6 @@ keywords: ["mechanistic interpretability", "AlgZoo", "ARC", "RNN", "argmedian"]
 **Figuras** (todas salen de `scripts/render_plots.py`; habrá que exportarlas al tema del blog): lámparas de un giro; plano + lupa de la banda; gráfica de la ley (error frente a b/(e·a), puntos exactos y curva).
 
 **Tus decisiones pendientes**
-1. ¿h=4 cerrado o primero los 0,064 puntos?
-2. Título.
+1. ~~¿h=4 cerrado o primero los 0,064 puntos?~~ Decidido 2026-10-30: primero los 0,064 puntos.
+2. ~~Título.~~ «Taking apart a 32-number network».
 3. ¿Post solo en xabier.me o también LessWrong desde el principio?

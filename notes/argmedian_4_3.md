@@ -47,6 +47,14 @@ Código: `src/leeuwenhoek/design.py` (tests en `tests/test_design.py`); script: 
   - Gaussiana: d = x₃ − x₂ ~ N(0, 2) tiene densidad 1/(2√π) en 0; x₁ − v ~ N(0, 3/2), E|x₁ − v| = √(3/π). Producto: √3/(2π) = 0,27566.
   - Comprobado con la enumeración exacta: error/(b/(e·a))² = 0,2757 para e de 0,25 a 0,70 (b = 0,05); todos los errores son ese empate x₂ ≈ x₃ con x₁ extremo. Con b grande sigue valiendo: b = 0,743 → ley 1,4827 %, exacto 1,4851 %.
   - Red entrenada: con su b y e la ley da 1,481 %; tiene 1,545 % (diferencia 0,064 puntos: lo que la red no tiene de diseño ideal).
+- **Los 0,064 puntos** (`scripts/gap_h4.py`, `scripts/gap_formula.py`): no son un error pequeño, son la resta de efectos grandes de signo contrario (exacto, diseño ideal → red entrenada):
+  - banda + estado muerto (x₂ ≈ x₃, responde x₁): 1,475 % → 1,100 %, **−0,376**: la red entrenada tiene la ventana de «x₁ por defecto» más estrecha.
+  - giro, frontera x₁/x₃ desplazada: 0 → 0,199 %, **+0,199**.
+  - empate x₁ ≈ x₂, responde x₂ (frontera desplazada): 0 → 0,133 %, **+0,133**.
+  - empate x₁ ≈ x₂ y luego el paso 3 decide mal: 0,009 → 0,112 %, **+0,103**.
+  - otros: +0,002; asimetría espejo: +0,008; orden superior de la ley: +0,002.
+  - Trasplantar cada desviación de la red al diseño por separado no sirve (cada una sola sube el error hasta +2,4 puntos; todas juntas, +0,053): se compensan entre sí.
+  - **Predicción de primer orden** (densidad en el empate × ancho de la ventana, anchos sacados de los pesos, sin ejecutar la red): giro 0,198 % (exacto 0,192), paso 2 «responde x₂» 0,118 % (exacto 0,133), banda + muerto 1,131 % (exacto 1,100). **Sin predecir: el término «paso 2 y luego paso 3 mal», 0,112 %**: necesita dos casi empates a la vez (segundo orden). Total predicho 1,447 % frente a 1,537 % exacto (red simetrizada).
 - **Una red de 32 parámetros puede hacerlo casi perfecto**: con b = 0,02 el diseño acierta el 99,999 %. La red entrenada tiene una memoria unas 10 veces mayor de lo necesario. [Sin comprobar por qué el entrenamiento se queda ahí.]
 
 ## Estimación mecanística del acierto
