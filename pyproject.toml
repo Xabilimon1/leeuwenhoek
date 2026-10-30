@@ -1,0 +1,24 @@
+[project]
+name = "leeuwenhoek"
+version = "0.0.1"
+description = "Taking apart the tiny networks of ARC's AlgZoo, one specimen at a time"
+requires-python = ">=3.11"
+dependencies = [
+  "alg-zoo @ git+https://github.com/alignment-research-center/alg-zoo@4433f505a90e85a37d35d34f80f6cccf4a37cef4",
+  "torch>=2.4.1",
+  "numpy",
+  "matplotlib",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
