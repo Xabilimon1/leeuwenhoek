@@ -88,6 +88,16 @@ def explained_twin(x):
     return pred
 
 
+def twin_from_cones(x, cones):
+    """Clean algorithm, overridden inside each cone (normals, says). No mirroring."""
+    pred = algorithmic_twin(x)
+    for normals, says in cones.values():
+        n = np.asarray(normals, np.float64)
+        inside = ((x.astype(np.float64) @ n.T) > 0).all(-1)
+        pred = np.where(inside, says, pred)
+    return pred
+
+
 def symmetrize(w):
     """Average the weights with their sign-mirror image, making the symmetry exact."""
     return {

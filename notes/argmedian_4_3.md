@@ -1,6 +1,6 @@
 # argmedian h=4 L=3 (32 parámetros)
 
-Modelo: `zoo_argmedian(4, 3)`, semilla 0 (mejor de 5), acierto medido 98,43 % (semilla de entradas 0) y 98,46 % (semilla 1), 10^6 entradas gaussianas (script: `scripts/accuracy_table.py`). Acierto **exacto** desde los pesos: **98,45504 %** (`scripts/exact_accuracy_table.py`). Estado: **mecanismo cualitativo cerrado; gemelo al 99,62 %; estimación a 0,155 puntos del acierto exacto.**
+Modelo: `zoo_argmedian(4, 3)`, semilla 0 (mejor de 5), acierto medido 98,43 % (semilla de entradas 0) y 98,46 % (semilla 1), 10^6 entradas gaussianas (script: `scripts/accuracy_table.py`). Acierto **exacto** desde los pesos: **98,45504 %** (`scripts/exact_accuracy_table.py`). Estado: **vuelta cerrada** (gemelo de 150 conos = modelo en float64 en 4·10^6 de 4·10^6 entradas); explicación por mecanismos (22 conos) al 99,83 %; estimación a 0,149 puntos; gemelo de pesos desde cero: pendiente.
 
 ## Comportamiento
 - Homogeneidad positiva: f(c·x) = c·f(x) para c > 0, exacta en float64 (`tests/test_sphere.py`). Solo cuenta la dirección de x; con entradas gaussianas, acierto = fracción de área de la esfera.
@@ -29,6 +29,9 @@ Script: `scripts/twins_argmedian_4_3.py` (entradas con semilla 1, no usadas para
 - **+ franjas de los giros + estado muerto** (`twins.explained_twin`, que usa la misma lista de conos que la estimación): **coincidencia 99,62 %**.
   - Giros (`scripts/turn_slivers.py`): la frontera x₁/x₃ del modelo está en x₃ = 1,0062·x₁ − 0,0083·x₂ (x₂ mínimo) y x₃ = 1,0213·x₁ − 0,0083·x₂ (x₂ máximo), no en x₃ = x₁.
   - Estado muerto (`estimate.dead_cones`): todas las preactivaciones del paso 3 ≤ 0 → logits 0 → x₁. Es la otra mitad del empate x₂ ≈ x₃: la banda existe con x₂/x₁ < ~0,52 y la zona muerta por encima (comprobado en `scripts/tie_band.py`: errores de la banda con v entre −2,84 y +0,17 [percentiles 5-95]; del estado muerto, entre +0,56 y +0,91).
+- **Mecanismos con pesos originales, por lado espejo** (`src/leeuwenhoek/mechanisms.py`, `scripts/mechanisms_h4.py`): 8 mecanismos (empate del paso 3 con x₁ máx./mín., empate del paso 2 con x₃ encima/debajo, 4 franjas de giro) + estado muerto, calculados de los pesos sin simetrizar y para cada lado (x₁ > 0 y x₁ < 0): 22 conos. **Coincidencia 99,83 %**, cobertura exacta 89,8 % de la masa de error, estimación 98,604 % (error 0,149 puntos).
+- **Cierre de la vuelta** (mismo script): el 0,158 % restante está en 61 trozos pequeños (≤ 0,015 % cada uno), sobre todo en caminos mezclados del paso 2. Añadiéndolos como conos exactos de camino (+114) y corrigiendo los falsos positivos de los mecanismos (+14 trozos correctos): 150 conos, **coincidencia 99,99997 %; 0 diferencias frente al modelo calculado en float64** (la única diferencia era redondeo float32 del propio modelo). Curva: 22 conos → 99,83 %; 32 → 99,93 %; 52 → 99,97 %; 136 → 99,992 %; 150 → 100 %.
+  - Lectura honesta: los últimos 128 conos son enumeración, no explicación. La explicación «comprimida» son los 22 conos de los mecanismos.
 - Pesos con simetría exacta: 99,79 %. Redondeando a 0,01: 98,95 %; a 0,1: 95,78 %; a 0,5: 42,87 %.
 - **La red es frágil**: redondear solo W_hh a 0,1 baja a 94,62 %; solo w_ih, 97,39 %; solo w_out, 99,07 %. Hay compensaciones finas, sobre todo en la recurrencia.
 
