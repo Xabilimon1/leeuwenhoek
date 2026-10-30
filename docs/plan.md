@@ -23,6 +23,7 @@ Titular si sale bien: «primeras explicaciones completas de argmedian / median /
   | h=4 | 32 | 98,46 % |
   | h=8 | 96 | 99,95 % |
 
+  Reproducido el 2026-10-30 con `scripts/accuracy_table.py` (forward propio en numpy, verificado contra torch en `tests/test_forward.py`): semilla 0 → 40,98 / 98,43 / 99,94 %; semilla 1 → 41,07 / 98,46 / 99,94 % (error típico ≈ 0,01-0,05 puntos).
   10^6 ejemplos tardan < 0,1 s. El cómputo no es un problema.
 - `median` (4,3) = `ScalarRNN` de 24 parámetros (salida escalar, se mide con error cuadrático). `longest_cycle` (3,3) = `DistTransformer` de 99 parámetros.
 - Tablas completas de acierto por tamaño: imágenes `images/zoo_*.svg` del repo de ARC.

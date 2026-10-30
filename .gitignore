@@ -6,3 +6,4 @@ data/
 *.pth
 .DS_Store
 agents/runs/
+*.egg-info/
