@@ -20,6 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--hidden", type=int, default=4)
 parser.add_argument("--n", type=int, default=1_000_000)
 parser.add_argument("--top", type=int, default=8)
+parser.add_argument("--path", default=None, help="e.g. 1100-0011-1010; default: most common")
 args = parser.parse_args()
 np.set_printoptions(precision=2, suppress=True)
 
@@ -53,12 +54,23 @@ for k, c in counts.most_common(args.top):
     cum += c
     print(f"  {k}: {c / args.n:6.2%}  err {wrong[m].mean():6.2%}  (cumulative {cum / args.n:6.2%})")
 
-top = counts.most_common(1)[0][0]
+top = args.path or counts.most_common(1)[0][0]
 masks = [np.array([int(b) for b in p], float) for p in top.split("-")]
 M, pre = path_matrices(w, masks)
 m = keys == top
 assert np.allclose(x[m] @ M.T, logits[m], atol=1e-3), "path matrix does not reproduce logits"
-print(f"\nMost common path {top}: logits = M @ (x1, x2, x3)")
+print(f"\nPath {top} ({m.mean():.2%} of inputs): logits = M @ (x1, x2, x3)")
 print(M)
 for t, z in enumerate(pre):
     print(f"pre-activations step {t + 1} (rows = neurons, cols = coeff of x1 x2 x3):\n{z}")
+
+# Which true orderings land in this path, and how often each is wrong
+order = np.argsort(x[m], axis=-1)
+names = np.array(["<".join(f"x{i + 1}" for i in o) for o in order])
+pred = logits[m].argmax(-1)
+print("\ntrue ordering inside this path:")
+for name, c in Counter(names).most_common():
+    k = names == name
+    wrong_k = wrong[m][k]
+    said = np.bincount(pred[k][wrong_k], minlength=3)
+    print(f"  {name}: {c / m.sum():6.1%} of path  err {wrong_k.mean():6.2%}  wrong answers x1/x2/x3: {said}")
