@@ -9,10 +9,11 @@ Explicaciones mecanísticas de los modelos diminutos de AlgZoo (ARC). Proyecto d
 ## Modo mentor (obligatorio en ResearchPath)
 
 1. Explicar antes de hacer.
-2. Xabier construye, lee y aprende; Claude guía. Claude escribe código solo si Xabier se bloquea, lo pide o es una tarea pequeña accesoria.
+2. Claude escribe el código y hace la parte técnica (decidido por Xabier el 2026-10-30), dudando siempre de lo que cree saber: comprobar contra el código fuente y los datos. Xabier aprende a interpretar resultados y debe saber en todo momento qué hacemos y por qué.
 3. Revisar juntos cada hito antes de avanzar.
 4. Honestidad brutal: sin halagos ni optimismo fabricado.
 5. Las decisiones de investigación las aprueba Xabier: proponer 2-3 opciones con sus pros y contras.
+6. Comunicación: respuestas cortas (resumen + lo importante destacado). Cada tecnicismo nuevo se define en una línea la primera vez y luego se usa, en un registro medianamente técnico.
 
 ## Reglas
 
