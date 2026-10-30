@@ -1,51 +1,11 @@
 """Mechanistic accuracy estimate for argmedian h=4 L=3, with no sampling.
 
 Every error region we explained is a polyhedral cone {x : n_i . x > 0 for all i}.
-A Gaussian puts probability (solid angle) / (4 pi) on a cone, and the solid
-angle of a convex polyhedral cone is exact: find its edge rays, fan-triangulate,
-and add the triangles (Van Oosterom & Strackee 1983).
+A Gaussian puts probability (solid angle) / (4 pi) on a cone, computed
+exactly in cones.py.
 """
 
-from itertools import combinations
-
-import numpy as np
-
-
-def cone_fraction(normals, tol=1e-12):
-    """Gaussian probability of the convex cone {x in R^3 : n . x > 0 for all n}."""
-    normals = np.asarray(normals, float)
-    if len(normals) == 2:
-        # A lune (wedge) between two planes: no corner rays, angle = pi - angle(n1, n2)
-        n1, n2 = normals / np.linalg.norm(normals, axis=1, keepdims=True)
-        return (np.pi - np.arccos(np.clip(n1 @ n2, -1, 1))) / (2 * np.pi)
-    rays = []
-    for a, b in combinations(normals, 2):
-        r = np.cross(a, b)
-        if np.linalg.norm(r) < tol:
-            continue
-        r /= np.linalg.norm(r)
-        for s in (r, -r):
-            if (normals @ s >= -1e-9).all() and not any(np.allclose(s, q) for q in rays):
-                rays.append(s)
-    if len(rays) == 2 and np.allclose(rays[0], -rays[1]):
-        raise ValueError("lune with redundant planes: pass only its two bounding planes")
-    if len(rays) < 3:
-        return 0.0
-    rays = np.array(rays)
-    centre = rays.mean(0)
-    centre /= np.linalg.norm(centre)
-    # order rays by angle around the centre
-    e1 = rays[0] - (rays[0] @ centre) * centre
-    e1 /= np.linalg.norm(e1)
-    e2 = np.cross(centre, e1)
-    rays = rays[np.argsort(np.arctan2(rays @ e2, rays @ e1))]
-    omega = 0.0
-    for i in range(1, len(rays) - 1):
-        r1, r2, r3 = rays[0], rays[i], rays[i + 1]
-        num = abs(r1 @ np.cross(r2, r3))
-        den = 1 + r1 @ r2 + r2 @ r3 + r3 @ r1
-        omega += 2 * np.arctan2(num, den)
-    return omega / (4 * np.pi)
+from leeuwenhoek.cones import cone_fraction
 
 
 def band_cones():

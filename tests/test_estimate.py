@@ -1,6 +1,7 @@
 import numpy as np
 
-from leeuwenhoek.estimate import band_cones, cone_fraction
+from leeuwenhoek.cones import cone_fraction
+from leeuwenhoek.estimate import band_cones
 from leeuwenhoek.metrics import gaussian_inputs
 
 
@@ -19,3 +20,20 @@ def test_band_cones_match_sampling():
         inside = (x @ np.asarray(normals, float).T > 0).all(-1).mean()
         se = np.sqrt(inside / len(x))
         assert abs(cone_fraction(normals) - inside) < 5 * se + 1e-6, name
+
+
+def test_degenerate_cones():
+    assert np.isclose(cone_fraction([(1, 0, 0)]), 1 / 2)  # half-space
+    assert np.isclose(cone_fraction([(1, 0, 0), (2, 0, 0)]), 1 / 2)  # repeated plane
+    assert cone_fraction([(1, 0, 0), (-1, 0, 0)]) == 0  # empty
+    # lune with a redundant third plane: x>0, y>0, x+y>0 -> 1/4
+    assert np.isclose(cone_fraction([(1, 0, 0), (0, 1, 0), (1, 1, 0)]), 1 / 4)
+    # the six orderings tile the space
+    from itertools import permutations
+    total = 0
+    for a, b, c in permutations(range(3)):
+        n1, n2 = np.zeros(3), np.zeros(3)
+        n1[[a, b]] = (-1, 1)
+        n2[[b, c]] = (-1, 1)
+        total += cone_fraction([n1, n2])
+    assert np.isclose(total, 1)
