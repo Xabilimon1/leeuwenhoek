@@ -13,7 +13,13 @@ import numpy as np
 from leeuwenhoek.forward import forward
 from leeuwenhoek.metrics import argmedian_target, gaussian_inputs
 from leeuwenhoek.models import load_argmedian
-from leeuwenhoek.twins import algorithmic_twin, algorithmic_twin_band, round_weights, symmetrize
+from leeuwenhoek.twins import (
+    algorithmic_twin,
+    algorithmic_twin_band,
+    algorithmic_twin_bands,
+    round_weights,
+    symmetrize,
+)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n", type=int, default=1_000_000)
@@ -38,6 +44,7 @@ row("+ step-3 tie band, eps3 = 0.013 (from weights)", algorithmic_twin(x, 0.013)
 for e in [0.005, 0.02, 0.03]:
     row(f"  sensitivity: eps3 = {e}", algorithmic_twin(x, e))
 row("+ step-3 band with derived edges (tie_band.py)", algorithmic_twin_band(x))
+row("+ step-2 slivers (tie_band_step2.py)", algorithmic_twin_bands(x))
 
 print("\nWeight twins (simplification ladder)")
 row("original weights (sanity check)", model)

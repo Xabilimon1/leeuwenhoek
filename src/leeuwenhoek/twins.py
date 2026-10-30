@@ -56,6 +56,26 @@ def algorithmic_twin_band(x):
     return np.where(down | up, 0, pred)
 
 
+def algorithmic_twin_bands(x):
+    """Step-3 band plus the step-2 slivers derived in scripts/tie_band_step2.py.
+
+    Mirror to x1 > 0, x1 = 1: e = (x2 - x1)/x1, r = x3/x1. Near x1 ~ x2 the
+    model's x1-vs-x2 boundary is shifted off the true tie (e = 0):
+        x3 above both:  boundary at e = -0.0213 + 0.0018 r
+        x3 below both:  boundary at e = +0.0053 + 0.0008 r
+    In the sliver between the true tie and the shifted boundary the model
+    picks x2 although the median is x1.
+    """
+    pred = algorithmic_twin_band(x)
+    xs = x * np.sign(x[:, :1])
+    e = (xs[:, 1] - xs[:, 0]) / xs[:, 0]
+    r = xs[:, 2] / xs[:, 0]
+    above = xs[:, 2] > np.maximum(xs[:, 0], xs[:, 1])
+    below = xs[:, 2] < np.minimum(xs[:, 0], xs[:, 1])
+    sliver = (above & (e > -0.0213 + 0.0018 * r) & (e < 0)) | (below & (e > 0) & (e < 0.0053 + 0.0008 * r))
+    return np.where(sliver, 1, pred)
+
+
 def symmetrize(w):
     """Average the weights with their sign-mirror image, making the symmetry exact."""
     return {
