@@ -1,6 +1,6 @@
 # argmedian h=4 L=3 (32 parámetros)
 
-Modelo: `zoo_argmedian(4, 3)`, semilla 0 (mejor de 5), acierto medido 98,43 % (semilla de entradas 0) y 98,46 % (semilla 1), 10^6 entradas gaussianas (script: `scripts/accuracy_table.py`). Acierto **exacto** desde los pesos: **98,45504 %** (`scripts/exact_accuracy_table.py`). Estado: **vuelta cerrada** (gemelo de 150 conos = modelo en float64 en 4·10^6 de 4·10^6 entradas); explicación por mecanismos (22 conos) al 99,83 %; estimación a 0,149 puntos; gemelo de pesos desde cero: pendiente.
+Modelo: `zoo_argmedian(4, 3)`, semilla 0 (mejor de 5), acierto medido 98,43 % (semilla de entradas 0) y 98,46 % (semilla 1), 10^6 entradas gaussianas (script: `scripts/accuracy_table.py`). Acierto **exacto** desde los pesos: **98,45504 %** (`scripts/exact_accuracy_table.py`). Estado: **vuelta cerrada** (gemelo de 150 conos = modelo en float64 en 4·10^6 de 4·10^6 entradas); explicación por mecanismos (22 conos) al 99,83 %; estimación a 0,149 puntos; gemelo de pesos desde cero con 2 números libres: acierto 98,52 %, coincidencia 98,76 %.
 
 ## Comportamiento
 - Homogeneidad positiva: f(c·x) = c·f(x) para c > 0, exacta en float64 (`tests/test_sphere.py`). Solo cuenta la dirección de x; con entradas gaussianas, acierto = fracción de área de la esfera.
@@ -35,6 +35,15 @@ Script: `scripts/twins_argmedian_4_3.py` (entradas con semilla 1, no usadas para
 - Pesos con simetría exacta: 99,79 %. Redondeando a 0,01: 98,95 %; a 0,1: 95,78 %; a 0,5: 42,87 %.
 - **La red es frágil**: redondear solo W_hh a 0,1 baja a 94,62 %; solo w_ih, 97,39 %; solo w_out, 99,07 %. Hay compensaciones finas, sobre todo en la recurrencia.
 
+### Gemelo de pesos desde cero
+Código: `src/leeuwenhoek/design.py` (tests en `tests/test_design.py`); script: `scripts/design_twin_h4.py`.
+- **Diseño**: cada mitad lleva σ_t = a·(x_t − x_{t−1}) (comparación) y μ_t = b·x_t + c·σ_{t−1} − e·μ_{t−1} (memoria). Exigir (1) σ₂ exacto, (2) σ₃ exacto sin restos de x₁ y (3) que la salida pueda comparar x₁ con x₃ en los giros y x₁ con x₂ en las rachas fija c = b(1 − e + e²)/(e·a), q = a/(g + b), p = q·g/a con g = c·a − e·b. La salida queda fijada salvo escala. Las dos neuronas de cada mitad solo están encendidas mientras |σ| > |μ|: cerca de un empate la pareja se rompe, y ahí falla.
+- **Predice los pesos entrenados**: leyendo a = 8,673, b = 0,743, e = 0,369 de la red, lo deducido cae dentro de lo entrenado (mismo lado / lado cruzado): p 0,631 (0,680 / 0,578), q 4,314 (3,950 / 4,857), c 0,178 (0,176 / 0,167); α_x2 −1,346 (entrenado −1,350), α_x3 −2,225 (−2,104).
+- **Números libres reales: 2** (b/a y e). La escala de la salida no cambia ni una predicción (0 cambios en 10⁶ entradas al doblar B2).
+- **Resultado**: acierto exacto 98,516 % (red 98,455 %); coincidencia con la red 98,76 %. El 93 % de los desacuerdos está en casi empates (hueco relativo < 0,05, 8 % de las entradas): gemelo y red fallan en las mismas zonas, no en los mismos puntos. La diferencia viene de lo que el diseño idealiza: la red usa constantes distintas según venga del mismo lado o del otro (e 0,415 / 0,324), y de ahí la fuga de x₁.
+- **Ley del error** (redes diseñadas, acierto exacto): **error = 2,023·(b/a)^2,000** (e = 0,369), encaja con 6 valores de b de 0,02 a 0,5 hasta la cuarta cifra. A la b/a de la red (0,0856) predice 1,482 %; la red tiene 1,545 %. [Sin explicar: por qué el exponente es exactamente 2.]
+- **Una red de 32 parámetros puede hacerlo casi perfecto**: con b = 0,02 el diseño acierta el 99,999 %. La red entrenada tiene una memoria unas 10 veces mayor de lo necesario. [Sin comprobar por qué el entrenamiento se queda ahí.]
+
 ## Estimación mecanística del acierto
 Script: `scripts/estimate_argmedian_4_3.py`; método en `src/leeuwenhoek/estimate.py` (tests en `tests/test_estimate.py`).
 - Cada zona de error explicada es un cono poliédrico; su probabilidad gaussiana = ángulo sólido / 4π, exacto (triangulación + Van Oosterom-Strackee). No se evalúa el modelo.
@@ -50,4 +59,5 @@ Script: `scripts/estimate_argmedian_4_3.py`; método en `src/leeuwenhoek/estimat
 - Errores restantes (0,26 %): piezas pequeñas de los caminos mezclados de los pasos 2 y 3.
 - Por qué la banda tiene esa pendiente: conectarla con la fuga de x₁ en el canal s.
 - Por qué la red necesita W_hh con dos decimales: qué combinaciones se compensan.
-- Gemelo de pesos construido desde cero (sin partir de los pesos entrenados).
+- Por qué la ley del error es cuadrática en b/a, y la constante 2,023 en función de e.
+- Por qué el entrenamiento deja b/a = 0,086 si un b menor da casi el 100 %.
