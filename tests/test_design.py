@@ -38,3 +38,14 @@ def test_designed_rnn_is_almost_perfect_away_from_ties():
     far = gaps > 0.3
     pred = forward(w, x).argmax(-1)
     assert np.mean(pred[far] == argmedian_target(x)[far]) > 0.999
+
+
+def test_error_law_closed_form():
+    # error of a designed net = sqrt(3) / (2 pi) * (b / (e a))^2, to leading order
+    from leeuwenhoek.exact import exact_accuracy
+
+    a = 8.67
+    for b, e in [(0.05, 0.3), (0.05, 0.6), (0.2, 0.369)]:
+        err = 1 - exact_accuracy(designed_weights(a, b, e, dtype=np.float64))[0]
+        law = np.sqrt(3) / (2 * np.pi) * (b / (e * a)) ** 2
+        assert abs(err / law - 1) < 0.005, (b, e, err, law)

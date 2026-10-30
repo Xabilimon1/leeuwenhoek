@@ -41,7 +41,12 @@ Código: `src/leeuwenhoek/design.py` (tests en `tests/test_design.py`); script: 
 - **Predice los pesos entrenados**: leyendo a = 8,673, b = 0,743, e = 0,369 de la red, lo deducido cae dentro de lo entrenado (mismo lado / lado cruzado): p 0,631 (0,680 / 0,578), q 4,314 (3,950 / 4,857), c 0,178 (0,176 / 0,167); α_x2 −1,346 (entrenado −1,350), α_x3 −2,225 (−2,104).
 - **Números libres reales: 2** (b/a y e). La escala de la salida no cambia ni una predicción (0 cambios en 10⁶ entradas al doblar B2).
 - **Resultado**: acierto exacto 98,516 % (red 98,455 %); coincidencia con la red 98,76 %. El 93 % de los desacuerdos está en casi empates (hueco relativo < 0,05, 8 % de las entradas): gemelo y red fallan en las mismas zonas, no en los mismos puntos. La diferencia viene de lo que el diseño idealiza: la red usa constantes distintas según venga del mismo lado o del otro (e 0,415 / 0,324), y de ahí la fuga de x₁.
-- **Ley del error** (redes diseñadas, acierto exacto): **error = 2,023·(b/a)^2,000** (e = 0,369), encaja con 6 valores de b de 0,02 a 0,5 hasta la cuarta cifra. A la b/a de la red (0,0856) predice 1,482 %; la red tiene 1,545 %. [Sin explicar: por qué el exponente es exactamente 2.]
+- **Ley del error, deducida** (`scripts/law_geometry.py`, `scripts/law_pieces.py`, test en `tests/test_design.py`): **error = (√3 / 2π)·(b/(e·a))² ≈ 0,2757·(b/(e·a))²**.
+  - Hipótesis descartada: los errores NO están en los polos (ángulo con la diagonal ≈ 60°, como cualquier entrada). Lo que encoge es el hueco entre los dos números empatados: ∝ (b/a)².
+  - Mecanismo: cerca de un empate |σ| < |μ| y cada pareja se rompe; queda una neurona de cada mitad (patrón `0101`/`1010`) y la salida lee α·μ + β·σ en vez de α·σ + β·μ. Como α ∝ (b/a)·β y μ ∝ b, la red responde x₁ en una ventana de |x₃ − x₂| de ancho H²·|x₁ − v| (H = b/(e·a) = h/a, v = valor de la pareja empatada).
+  - Gaussiana: d = x₃ − x₂ ~ N(0, 2) tiene densidad 1/(2√π) en 0; x₁ − v ~ N(0, 3/2), E|x₁ − v| = √(3/π). Producto: √3/(2π) = 0,27566.
+  - Comprobado con la enumeración exacta: error/(b/(e·a))² = 0,2757 para e de 0,25 a 0,70 (b = 0,05); todos los errores son ese empate x₂ ≈ x₃ con x₁ extremo. Con b grande sigue valiendo: b = 0,743 → ley 1,4827 %, exacto 1,4851 %.
+  - Red entrenada: con su b y e la ley da 1,481 %; tiene 1,545 % (diferencia 0,064 puntos: lo que la red no tiene de diseño ideal).
 - **Una red de 32 parámetros puede hacerlo casi perfecto**: con b = 0,02 el diseño acierta el 99,999 %. La red entrenada tiene una memoria unas 10 veces mayor de lo necesario. [Sin comprobar por qué el entrenamiento se queda ahí.]
 
 ## Estimación mecanística del acierto
@@ -59,5 +64,4 @@ Script: `scripts/estimate_argmedian_4_3.py`; método en `src/leeuwenhoek/estimat
 - Errores restantes (0,26 %): piezas pequeñas de los caminos mezclados de los pasos 2 y 3.
 - Por qué la banda tiene esa pendiente: conectarla con la fuga de x₁ en el canal s.
 - Por qué la red necesita W_hh con dos decimales: qué combinaciones se compensan.
-- Por qué la ley del error es cuadrática en b/a, y la constante 2,023 en función de e.
 - Por qué el entrenamiento deja b/a = 0,086 si un b menor da casi el 100 %.

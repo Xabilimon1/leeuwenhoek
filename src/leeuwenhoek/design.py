@@ -21,7 +21,11 @@ logit x1 = 0, beta_x2 = B2, beta_x3 = -B3, and alphas chosen so that
     L_x2 - L_x1 = B2 h (x2 - x1)  and  L_x1 - L_x3 = B3 h (x3 - x1)   (times the sign)
 which is exactly the median rule on every clean path.
 Neurons are n1 = (s - d)/2, n2 = (s + d)/2 (and mirrored): both are on only
-while |sigma| > |mu|, so near ties the pair breaks. That is where it fails.
+while |sigma| > |mu|, so near ties the pair breaks. That is where it fails:
+one neuron of each half stays on, the readout then sees alpha*mu + beta*sigma
+instead of alpha*sigma + beta*mu, and x1 wins in a window of |x3 - x2| of width
+(h/a)^2 |x1 - x2|. Under Gaussian inputs the error is sqrt(3)/(2 pi) (b/(e a))^2
+(note h = b + g = b/e).
 """
 
 import numpy as np
