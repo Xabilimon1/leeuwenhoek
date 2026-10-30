@@ -34,7 +34,7 @@ _, w = load_argmedian(args.hidden, 3)
 pred = forward(w, u.reshape(-1, 3)).argmax(-1).reshape(N_Z, N_THETA)
 true = argmedian_target(u)
 wrong = pred != true
-print(f"h={args.hidden}: error on map = {wrong.mean():.4%}")
+print(f"h={args.hidden}: error on map = {wrong.mean():.4%}  (picture only: the grid has no pixel centre within\n  0.125 deg of an ordering boundary and misses thinner slivers; exact numbers: exact_accuracy_table.py)")
 
 # Breakdown per ordering. Orderings change where x_i = x_j, i.e. at
 # theta = 30 + 60k degrees (not at multiples of 60).
