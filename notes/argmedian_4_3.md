@@ -10,7 +10,11 @@ Modelo: `zoo_argmedian(4, 3)`, semilla 0 (mejor de 5), acierto medido 98,43 % (s
 ## Mecanismo
 - **Dos mitades espejo**: neuronas 1-2 (w_ih > 0) y 3-4 (w_ih < 0). Intercambiar 1↔4, 2↔3 deja los pesos casi iguales (≤ 0,05) y la respuesta igual para x y −x en el 99,55 % (`scripts/relu_patterns.py`).
 - **Cada paso guarda una comparación con el valor anterior** (`scripts/comparisons.py`): la mitad que domina en el paso 1 = signo de x₁ (100 %); en el paso 2 = x₂ > x₁ (99,92 %); en el paso 3 = x₃ > x₂ (99,77 %).
-- Dentro de una mitad, las dos neuronas son la misma comparación con umbrales distintos (paso 2, x₁ > 0: neurona 3 activa si x₂ < 0,79·x₁, neurona 4 si x₂ < 1,24·x₁). [Interpretación sin comprobar: esto deja una memoria 2D que permite recuperar x₁ en el paso 3.]
+- Dentro de una mitad, las dos neuronas son la misma comparación con umbrales distintos (paso 2, x₁ > 0: neurona 3 activa si x₂ < 0,79·x₁, neurona 4 si x₂ < 1,24·x₁).
+- **Base suma/diferencia** (`scripts/memory_basis.py`, pesos simetrizados): cada mitad guarda dos canales.
+  - s = suma de la pareja ≈ 8,67·(x_t − x_{t−1}), con una fuga de ±0,8…1,2·x₁ en el paso 3. Su signo decide la mitad.
+  - d = diferencia de la pareja, pequeño (entrada 0,74·x_t). La recurrencia combina s y d para reconstruir el valor anterior (p. ej. −0,68·s − 3,95·d = −8,82·x₁ en el paso 2), y la salida lee sobre todo d (coeficientes 17,4 y −13,6 frente a ≤ 2,1 para s).
+  - La fragilidad está en d: redondear a 0,1 las filas de d de W_hh deja la coincidencia en 90,5 %; las de s, 97,7 %.
 - **Lectura final** (`scripts/paths.py`): secuencia monótona → x₂ (0,00 % de error). Giro (x₂ mínimo o máximo) → compara x₁ con x₃ por magnitud; en el camino `1100-0011-1100`: logit x₂ ≈ 31·(x₂−x₁), logit x₃ ≈ 27·(x₁−x₃), logit x₁ ≈ 0.
 - **Presupuesto de errores** (`scripts/error_budget.py`, error 1,57 %): giro 13 % de los fallos; casi empate en el paso 2 (x₁ ≈ x₂) 16 %; **casi empate en el paso 3 (x₂ ≈ x₃) 61 %**; estado final muerto (todo a 0, argmax cae en x₁) 11 %.
 - **Sesgo hacia x₁**: en el casi empate del paso 3, los logits de x₂ y x₃ llevan un término ≈ −1,5…−1,9·x₁ que los deja por debajo del logit de x₁ (≈ 0); en el 99,7 % de esos fallos gana x₁.
