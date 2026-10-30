@@ -29,7 +29,13 @@ Script: `scripts/twins_argmedian_4_3.py` (entradas con semilla 1, no usadas para
 - **La red es frágil**: redondear solo W_hh a 0,1 baja a 94,62 %; solo w_ih, 97,39 %; solo w_out, 99,07 %. Hay compensaciones finas, sobre todo en la recurrencia.
 
 ## Estimación mecanística del acierto
-- Pendiente.
+Script: `scripts/estimate_argmedian_4_3.py`; método en `src/leeuwenhoek/estimate.py` (tests en `tests/test_estimate.py`).
+- Cada zona de error explicada es un cono poliédrico; su probabilidad gaussiana = ángulo sólido / 4π, exacto (triangulación + Van Oosterom-Strackee). No se evalúa el modelo.
+- Errores: banda del paso 3 con x₁ máximo 0,740 %; con x₁ mínimo 0,168 %; franjas del paso 2: 0,057 % + 0,060 %.
+- **Estimación: 98,97 %.** Acierto real (10^7 muestras): 98,454 % ± 0,004 %. **Error de la estimación: 0,52 puntos**, lo que el muestreo consigue con ~560 evaluaciones del modelo. El coste de la estimación es de unas pocas evaluaciones [orden de magnitud, sin medir].
+- Coincide con el acierto del gemelo por muestreo (98,977 %): la estimación calcula exactamente el gemelo.
+- Sesgo conocido: sobreestima el acierto porque faltan zonas de error sin explicar (estado muerto 0,17 %, el resto del paso 2, giros).
+- Limitación: los coeficientes salen de los pesos, pero qué camino mezclado usar se eligió por frecuencia en una muestra.
 
 ## Lo que queda sin explicar
 - Forma exacta de las bandas de empate (pasos 2 y 3) y de la zona muerta.
