@@ -68,3 +68,13 @@ for case, sel in [("step 2 down (x2 < x1)", down2), ("step 2 up (x2 > x1)", ~dow
     m = sel & wrong & (pred == 0)
     print(f"   model's wrong-x1 answers in this case: {m.sum()}, inside predicted band: {np.mean(in_band[m]):.1%}")
     print(f"   predicted band: {in_band.sum()} inputs, model answers x1 wrongly in {np.mean((wrong & (pred == 0))[in_band]):.1%}\n")
+
+# The step-3 tie (x2 ~ x3, x1 extreme) splits by v = x2/x1: mixed band below ~0.52,
+# dead final state above. Check where each kind of wrong-x1 answer sits.
+dead = ~on[:, 2].any(-1)
+tie = np.abs(delta) < 0.05
+print("v = x2/x1 for wrong-x1 answers in the step-3 tie (x2 < x1 case):")
+for name, kind in [("mixed@3 (band)", mixed3), ("dead final state", dead)]:
+    m = wrong & (pred == 0) & tie & down2 & kind
+    q = np.percentile(v[m], [5, 50, 95])
+    print(f"  {name:<18} n={m.sum():5d}  v 5%/50%/95%: {q[0]:+.2f} / {q[1]:+.2f} / {q[2]:+.2f}")

@@ -4,7 +4,7 @@ Modelo: `zoo_argmedian(4, 3)`, semilla 0 (mejor de 5), acierto medido 98,43 % (s
 
 ## Comportamiento
 - Homogeneidad positiva: f(c·x) = c·f(x) para c > 0, exacta en float64 (`tests/test_sphere.py`). Solo cuenta la dirección de x; con entradas gaussianas, acierto = fracción de área de la esfera.
-- Mapa de igual área (`scripts/sphere_map.py`, `figures/sphere_argmedian_4_3.png`): error 1,52 % del área. El 75 % de los fallos están a < 1° de una frontera entre órdenes (3,3 % del área); otro 18 % cerca de los polos (|z| > 0,99, los tres valores casi iguales).
+- Mapa de igual área (`scripts/sphere_map.py`, `figures/sphere_argmedian_4_3.png`): error 1,52 % del área (el mapa infravalora un poco: no tiene centros de píxel a < 0,125° de las fronteras; el error exacto es 1,545 %). El 75 % de los fallos están a < 1° de una frontera entre órdenes (3,3 % del área); otro 18 % cerca de los polos (|z| > 0,99, los tres valores casi iguales).
 - El 78 % de las respuestas erróneas son «x₁».
 
 ## Mecanismo
@@ -28,7 +28,7 @@ Script: `scripts/twins_argmedian_4_3.py` (entradas con semilla 1, no usadas para
 - **+ franjas del empate del paso 2** (`scripts/tie_band_step2.py`, `twins.algorithmic_twin_bands`): con x₁ > 0 y x₁ = 1, e = (x₂−x₁)/x₁, r = x₃/x₁. La frontera x₁/x₂ del modelo está desplazada del empate real (e = 0): a e = −0,0213 + 0,0018r si x₃ está por encima de los dos, a e = +0,0053 + 0,0008r si está por debajo. En la franja intermedia responde x₂ cuando la mediana es x₁ (el error más común del paso 2). Otro 18,6 % de los errores del paso 2 son estado muerto (responde x₁). **Coincidencia 99,33 %** (semilla 1) y 99,33 % (semilla 2).
 - **+ franjas de los giros + estado muerto** (`twins.explained_twin`, que usa la misma lista de conos que la estimación): **coincidencia 99,62 %**.
   - Giros (`scripts/turn_slivers.py`): la frontera x₁/x₃ del modelo está en x₃ = 1,0062·x₁ − 0,0083·x₂ (x₂ mínimo) y x₃ = 1,0213·x₁ − 0,0083·x₂ (x₂ máximo), no en x₃ = x₁.
-  - Estado muerto (`estimate.dead_cones`): todas las preactivaciones del paso 3 ≤ 0 → logits 0 → x₁. Es la otra mitad del empate x₂ ≈ x₃: la banda existe con x₂/x₁ < ~0,52 y la zona muerta por encima [lectura de las desigualdades de los pesos; la frontera exacta entre ambas sin medir].
+  - Estado muerto (`estimate.dead_cones`): todas las preactivaciones del paso 3 ≤ 0 → logits 0 → x₁. Es la otra mitad del empate x₂ ≈ x₃: la banda existe con x₂/x₁ < ~0,52 y la zona muerta por encima (comprobado en `scripts/tie_band.py`: errores de la banda con v entre −2,84 y +0,17 [percentiles 5-95]; del estado muerto, entre +0,56 y +0,91).
 - Pesos con simetría exacta: 99,79 %. Redondeando a 0,01: 98,95 %; a 0,1: 95,78 %; a 0,5: 42,87 %.
 - **La red es frágil**: redondear solo W_hh a 0,1 baja a 94,62 %; solo w_ih, 97,39 %; solo w_out, 99,07 %. Hay compensaciones finas, sobre todo en la recurrencia.
 
