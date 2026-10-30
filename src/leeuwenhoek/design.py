@@ -39,6 +39,30 @@ def derived(a, b, e):
     return {"c": c, "g": g, "h": b + g, "p": p, "q": q}
 
 
+def read_off(w):
+    """The design's free numbers as the trained net has them (mirror-symmetrized).
+
+    e differs slightly between same-half and cross-half transitions in the
+    trained net; the design uses one e, the mean of the two.
+    """
+    from leeuwenhoek.twins import symmetrize
+
+    s = symmetrize(w)
+    W = B @ s["w_hh"].astype(np.float64) @ BINV
+    w_ih_sd = B @ s["w_ih"].astype(np.float64)
+    rel = s["w_out"].astype(np.float64) @ BINV
+    rel = rel - rel[0]  # relative to the x1 logit: a common offset changes nothing
+    return {
+        "a": float(w_ih_sd[0]),
+        "b": float(w_ih_sd[1]),
+        "e": float((-W[1, 1] + W[1, 3]) / 2),
+        "e_same": float(-W[1, 1]),
+        "e_cross": float(W[1, 3]),
+        "B2": float(rel[1, 1]),
+        "B3": float(-rel[2, 1]),
+    }
+
+
 def designed_weights(a=8.67, b=0.74, e=0.37, B2=15.7, B3=15.2, dtype=np.float32):
     k = derived(a, b, e)
     p, q, c = k["p"], k["q"], k["c"]
