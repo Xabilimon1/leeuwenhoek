@@ -34,7 +34,8 @@ def step_normals(pre_t, mask):
 
 
 def pieces(w):
-    """Yield dicts with path, ordering, predicted position and exact probability."""
+    """Yield dicts with path, ordering, predicted position, exact probability
+    and the cone normals (so pieces can be intersected with other cones)."""
     w = {k: np.asarray(v, np.float64) for k, v in w.items()}
     h = len(w["w_ih"])
     masks = [np.array(m, float) for m in product((0, 1), repeat=h)]
@@ -63,12 +64,13 @@ def pieces(w):
                     # all logits equal (dead state): argmax picks the first index
                     if k != 0:
                         continue
-                    p = cone_fraction(base)
+                    cone = base
                 else:
                     # ties go to the lower index; measure zero, ignore
-                    p = cone_fraction(base + diffs)
+                    cone = base + diffs
+                p = cone_fraction(cone)
                 if p > 0:
-                    yield {"path": name, "order": o, "pred": k, "prob": p}
+                    yield {"path": name, "order": o, "pred": k, "prob": p, "normals": cone}
 
 
 def exact_accuracy(w):

@@ -76,6 +76,18 @@ def algorithmic_twin_bands(x):
     return np.where(sliver, 1, pred)
 
 
+def explained_twin(x):
+    """Clean algorithm, overridden inside every explained error cone (and its mirror)."""
+    from leeuwenhoek.estimate import explained_cones
+
+    pred = algorithmic_twin(x)
+    for normals, says in explained_cones().values():
+        n = np.asarray(normals, x.dtype)
+        inside = ((x @ n.T) > 0).all(-1) | ((-x @ n.T) > 0).all(-1)
+        pred = np.where(inside, says, pred)
+    return pred
+
+
 def symmetrize(w):
     """Average the weights with their sign-mirror image, making the symmetry exact."""
     return {

@@ -17,6 +17,7 @@ from leeuwenhoek.twins import (
     algorithmic_twin,
     algorithmic_twin_band,
     algorithmic_twin_bands,
+    explained_twin,
     round_weights,
     symmetrize,
 )
@@ -45,6 +46,7 @@ for e in [0.005, 0.02, 0.03]:
     row(f"  sensitivity: eps3 = {e}", algorithmic_twin(x, e))
 row("+ step-3 band with derived edges (tie_band.py)", algorithmic_twin_band(x))
 row("+ step-2 slivers (tie_band_step2.py)", algorithmic_twin_bands(x))
+row("+ turn slivers + dead state (explained_twin)", explained_twin(x))
 
 print("\nWeight twins (simplification ladder)")
 row("original weights (sanity check)", model)

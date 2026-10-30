@@ -16,7 +16,7 @@ def test_one_ordering_is_one_sixth():
 
 def test_band_cones_match_sampling():
     x = gaussian_inputs(4_000_000, 3, seed=3).astype(np.float64)
-    for name, normals in band_cones().items():
+    for name, (normals, _) in band_cones().items():
         inside = (x @ np.asarray(normals, float).T > 0).all(-1).mean()
         se = np.sqrt(inside / len(x))
         assert abs(cone_fraction(normals) - inside) < 5 * se + 1e-6, name
@@ -37,3 +37,15 @@ def test_degenerate_cones():
         n2[[b, c]] = (-1, 1)
         total += cone_fraction([n1, n2])
     assert np.isclose(total, 1)
+
+
+def test_estimate_equals_explained_twin_accuracy():
+    # the estimate must compute exactly the twin built from the same cones
+    from leeuwenhoek.estimate import estimate_accuracy
+    from leeuwenhoek.metrics import argmedian_target
+    from leeuwenhoek.twins import explained_twin
+
+    x = gaussian_inputs(4_000_000, 3, seed=7).astype(np.float64)
+    acc = np.mean(explained_twin(x) == argmedian_target(x))
+    est, _ = estimate_accuracy()
+    assert abs(acc - est) < 5 * np.sqrt(acc * (1 - acc) / len(x))
