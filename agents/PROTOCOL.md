@@ -64,6 +64,20 @@ Tests: `tests/test_agents.py` (15). Por ejemplo, un gemelo con la regla limpia d
 
 Ninguna estimación de la tarea v2 supera al muestreo con el mismo cómputo.
 
+### Resultados con 3 repeticiones (tarea v2)
+
+| Agente | Gemelo (3 rep.) | Media | Error estimación (puntos) | Media | Tiempo usado | Notas |
+|---|---|---|---|---|---|---|
+| Claude | 99,24 / 99,25 / 99,61 | 99,37 % | 0,025 / 0,145 / 0,055 | 0,075 | 3-16 min | rep. 1 supera el tope de entradas |
+| Antigravity | 99,23 / 99,11 / 99,05 | 99,13 % | 0,125 / 0,115 / 0,057 | 0,099 | 12-13 min | rep. 3: `pip install scipy` (internet) y `find /` fuera de su carpeta |
+| Codex | 98,45 / 98,45 / 98,45 | 98,45 % | 0,245 / 0,145 / 0,155 | 0,182 | 3-5 min | siempre la regla de la mediana; rep. 3 supera el tope |
+| Grok | 99,54 / — / — | — | — / — / — | — | 30 min (cortado) | 1 de 3 entrega gemelo, 0 de 3 estimación; rep. 3 supera el tope |
+| Nosotros | 99,83 (22 zonas) | | 0,149 | | días | |
+
+Ninguna estimación supera al muestreo con el mismo cómputo (0,011-0,026 puntos).
+
+**Fallo de montaje: scipy no estaba instalado** en el Python del sistema que usan los agentes, aunque la tarea decía que sí. Nueve transcripciones dan «No module named 'scipy'». Antigravity-3 lo instaló con pip (regla rota, y cambió el Python de Xabier); las ejecuciones simultáneas o posteriores pudieron tenerlo. Condición desigual: anotarlo en los resultados. Para próximas rondas, comprobar scipy antes de lanzar (ahora está, 1.18.1).
+
 ## Lanzamiento y aislamiento (verificado 2026-11-08)
 
 Se lanza con `agents/launch.sh <agente> <ejecución> 30`. Lo que hace:
