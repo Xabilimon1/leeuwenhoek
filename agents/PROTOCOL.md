@@ -51,6 +51,19 @@ Tests: `tests/test_agents.py` (15). Por ejemplo, un gemelo con la regla limpia d
 - **Claude y Antigravity vieron el acierto muestreado** (permitido por el acceso al modelo) antes de estimar: la estimación no es independiente del muestreo. Por eso el marcador compara con el error del muestreo con el mismo cómputo (métrica de ARC).
 - **Antigravity guarda memoria** (`brain/`, `implicit/`, resúmenes): el lanzador la archiva antes de cada ejecución; comprobado que no recuerda nada después.
 
+### Resultados ronda 1 (tarea v2, argmedian h=4; acierto exacto 98,455 %)
+
+| Ejecución | Tiempo | Gemelo | Pesos literales | Error estimación | Error muestreo mismo cómputo | Entradas | Notas |
+|---|---|---|---|---|---|---|---|
+| claude-1 | 3 min | 99,24 % | 0 | 0,025 | 0,011 | 1,30 M | tope superado |
+| antigravity-1 | 12 min | 99,23 % | 0 | 0,125 | 0,016 | 0,57 M | |
+| codex-1 | 5 min | 98,45 % (regla de la mediana) | 0 | 0,245 | 0,013 | 0,95 M | |
+| grok-2 | 40 min* | — | — | — | — | 0,63 M | sin entregables (*antes de `timeout -k`) |
+| grok-3 | 30 min | **99,54 %** | 0 | — | — | 1,11 M | sin EXPLANATION ni estimate (cortado); tope superado |
+| grok-1 (v1) | 28 min | 100 % | 16/32 | 0,005 | 0,025 | 0,24 M | copia compilada; tarea v1 |
+
+Ninguna estimación de la tarea v2 supera al muestreo con el mismo cómputo.
+
 ## Lanzamiento y aislamiento (verificado 2026-11-08)
 
 Se lanza con `agents/launch.sh <agente> <ejecución> 30`. Lo que hace:
