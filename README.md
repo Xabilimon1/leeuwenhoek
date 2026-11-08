@@ -114,3 +114,7 @@ To look at the network interactively, open [`notebooks/h4.ipynb` in Google Colab
 
 Not affiliated with ARC. The code was written with Claude Code; the analysis, decisions and posts are
 Xabier Ariznabarreta's.
+
+## License
+
+[MIT](LICENSE).
