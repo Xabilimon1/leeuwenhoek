@@ -69,7 +69,7 @@ gemini --approval-mode yolo --sandbox --output-format stream-json \
 # OJO: Grok carga ~/.claude (CLAUDE.md global, 57 skills, permisos). Se aísla con un HOME
 # propio que solo tiene ~/.grok/{auth.json,config.toml}; `grok inspect` lo confirma limpio.
 HOME=~/agent-runs/.home-grok grok memory clear   # sin memoria entre repeticiones
-HOME=~/agent-runs/.home-grok timeout 3600 grok -p "Read TASK.md and do the task." \
+HOME=~/agent-runs/.home-grok timeout 1800 grok -p "Read TASK.md and do the task." \
   --always-approve --disable-web-search --output-format streaming-messages-json \
   > ../grok-argmedian_4_3-1.jsonl
 ```
@@ -79,7 +79,7 @@ Después: `uv run python -m agents.score "$RUN" > ../<nombre>.score.json`.
 ## Decidido por Xabier (2026-11-08)
 
 - **Grok:** su suscripción (SuperGrok / X Premium+, login en navegador), no clave de API. Comprobar en el piloto que cubre el modo sin interfaz; si no, volver a decidir.
-- **Presupuesto:** 60 min por ejecución con corte duro (`timeout 3600`).
+- **Presupuesto:** 30 min por ejecución con corte duro (`timeout 1800`); cambiado de 60 a 30 por la cuota de la suscripción (Xabier, 2026-11-08).
 - **Acceso al modelo:** sí, con tope de 10⁶ entradas registradas en `model_calls.jsonl`; la estimación final sin muestrear.
 - **Repeticiones:** 3 por agente, Grok primero.
 - Por defecto (recomendación, sin objeción): modelo argmedian h=4 en el piloto; transcripción = salida JSON de cada CLI + `git diff` final; sin internet, con scipy.
