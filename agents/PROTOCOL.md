@@ -65,8 +65,12 @@ codex exec --sandbox workspace-write --json --cd "$RUN" \
 gemini --approval-mode yolo --sandbox --output-format stream-json \
   "Read TASK.md and do the task." > ../gemini-argmedian_4_3-1.jsonl
 
-# Grok Build (si se elige la opción 1)
-XAI_API_KEY=... grok -p "Read TASK.md and do the task." --output-format streaming-json \
+# Grok Build 1.0.77 con la suscripción de Xabier (probado 2026-11-08: `grok -p` responde).
+# OJO: Grok carga ~/.claude (CLAUDE.md global, 57 skills, permisos). Se aísla con un HOME
+# propio que solo tiene ~/.grok/{auth.json,config.toml}; `grok inspect` lo confirma limpio.
+HOME=~/agent-runs/.home-grok grok memory clear   # sin memoria entre repeticiones
+HOME=~/agent-runs/.home-grok timeout 3600 grok -p "Read TASK.md and do the task." \
+  --always-approve --disable-web-search --output-format streaming-messages-json \
   > ../grok-argmedian_4_3-1.jsonl
 ```
 
