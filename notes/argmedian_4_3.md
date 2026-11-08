@@ -5,7 +5,7 @@ Modelo: `zoo_argmedian(4, 3)`, semilla 0 (mejor de 5), acierto medido 98,43 % (s
 ## Comportamiento
 - Homogeneidad positiva: f(c·x) = c·f(x) para c > 0, exacta en float64 (`tests/test_sphere.py`). Solo cuenta la dirección de x; con entradas gaussianas, acierto = fracción de área de la esfera.
 - Mapa de igual área (`scripts/sphere_map.py`, `figures/sphere_argmedian_4_3.png`): error 1,52 % del área (el mapa infravalora un poco: no tiene centros de píxel a < 0,125° de las fronteras; el error exacto es 1,545 %). El 75 % de los fallos están a < 1° de una frontera entre órdenes (3,3 % del área); otro 18 % cerca de los polos (|z| > 0,99, los tres valores casi iguales).
-- El 78 % de las respuestas erróneas son «x₁».
+- El 77 % de las respuestas erróneas son «x₁» (exacto, enumeración de caminos: 76,8 %; el mapa de píxeles daba 78 % porque se deja las franjas finas; `scripts/blog_figures.py`).
 
 ## Mecanismo
 - **Dos mitades espejo**: neuronas 1-2 (w_ih > 0) y 3-4 (w_ih < 0). Intercambiar 1↔4, 2↔3 deja los pesos casi iguales (≤ 0,05) y la respuesta igual para x y −x en el 99,55 % (`scripts/relu_patterns.py`).

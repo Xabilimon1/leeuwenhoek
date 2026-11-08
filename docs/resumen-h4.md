@@ -35,7 +35,7 @@ O sea, solo importa la **dirección** de la flecha (x₁, x₂, x₃), no su lon
 
 Pintamos esa esfera, cada punto del color de lo que responde la red, con los errores en negro. Saltaron dos pistas:
 - **Los errores eran líneas finísimas pegadas a las fronteras donde dos números empatan.** La red solo se equivoca cuando dos números son casi iguales.
-- **El 78 % de las respuestas equivocadas eran «x₁».** Algo empujaba a la red hacia la primera posición.
+- **El 77 % de las respuestas equivocadas eran «x₁».** Algo empujaba a la red hacia la primera posición.
 
 ## Las lámparas: sube o baja
 
@@ -66,7 +66,7 @@ Es como llevar una mano que señala «arriba» o «abajo» con fuerza y otra que
 
 Ahora la pista de los empates encaja. Cuando dos números son casi iguales, la comparación (la mano que señala) se queda casi a cero, **más pequeña que el susurro de la memoria**. Y entonces la pareja de neuronas **se rompe**: queda encendida una neurona de cada pareja, como si la red dudara entre «sube» y «baja», o se apagan todas.
 
-En los dos casos la salida pierde la información y todas las puntuaciones quedan cerca de cero. Cuando hay empate, la red elige la primera posición: **x₁ por defecto**. De ahí el 78 % de errores «x₁».
+En los dos casos la salida pierde la información y todas las puntuaciones quedan cerca de cero. Cuando hay empate, la red elige la primera posición: **x₁ por defecto**. De ahí el 77 % de errores «x₁».
 
 Ejemplo: con (1; −0,3; −0,295), x₂ y x₃ casi empatan. La mediana es x₃, pero la red duda en el paso 3 y responde x₁.
 
@@ -187,7 +187,7 @@ Reescribí la red a mano (en numpy) y un test comprueba que da **exactamente** l
 *Scripts: `src/leeuwenhoek/forward.py`, `tests/test_forward.py`, `scripts/accuracy_table.py`.*
 
 ### Paso 2. Primera pista: solo importa la dirección
-Como no hay sesgos, la respuesta solo depende de la dirección de la entrada. Con entradas gaussianas, todas las direcciones son igual de probables, así que **el acierto es una fracción del área de una esfera**. Dibujamos esa esfera en un mapa en el que cada píxel tiene la misma probabilidad (proyección de igual área): **el 75 % de los errores están pegados a las fronteras donde dos números empatan**, y el 78 % de las respuestas erróneas son «x₁».
+Como no hay sesgos, la respuesta solo depende de la dirección de la entrada. Con entradas gaussianas, todas las direcciones son igual de probables, así que **el acierto es una fracción del área de una esfera**. Dibujamos esa esfera en un mapa en el que cada píxel tiene la misma probabilidad (proyección de igual área): **el 75 % de los errores están pegados a las fronteras donde dos números empatan**, y el 77 % de las respuestas erróneas son «x₁».
 *Scripts: `src/leeuwenhoek/sphere.py`, `scripts/sphere_map.py`.*
 
 ### Paso 3. Qué hace: sube o baja
