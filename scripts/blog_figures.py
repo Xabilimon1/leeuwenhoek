@@ -96,7 +96,7 @@ def legend_chips(fig, s, y=0.02, x0=0.08, with_wrong=True):
         fig.text(x + 0.02, y + 0.015, label, va="center", color=TEXT2, fontsize=10)
 
 
-def fig_sphere(w, s):
+def fig_sphere(w, s, figsize=(11, 4.6)):
     """Equal-area map of input directions: colour = answer, light = wrong, plus a zoom on one boundary."""
     theta, z = grid(1440, 720)
     u = directions(theta, z)
@@ -104,7 +104,7 @@ def fig_sphere(w, s):
     wrong = pred != argmedian_target(u)
     img = np.where(wrong, 3, pred)
     cmap = ListedColormap([dim(c) for c in X] + [WRONG])
-    fig = plt.figure(figsize=(11, 4.6))
+    fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(1, 2, width_ratios=[3.2, 1], wspace=0.08, left=0.03, right=0.99, top=0.86, bottom=0.14)
     ax = fig.add_subplot(gs[0])
     ax.set_xlim(0, 360)
@@ -358,6 +358,9 @@ def main():
         "4-channels": fig_channels(w, s), "5-plane": fig_plane(w, s), "6-ladder": fig_ladder(s),
         "7-estimate": fig_estimate(s), "8-weights": fig_weights(w, s),
     }
+    cover = fig_sphere(w, s, figsize=(12.8, 8))  # 1280x800 cover for the projects list
+    cover.savefig(out / "0-cover.png", dpi=100)
+    plt.close(cover)
     for name, fig in figs.items():
         fig.savefig(out / f"{name}.png", dpi=170)
         plt.close(fig)
