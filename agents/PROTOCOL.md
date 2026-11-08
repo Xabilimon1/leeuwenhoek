@@ -72,7 +72,15 @@ XAI_API_KEY=... grok -p "Read TASK.md and do the task." --output-format streamin
 
 Después: `uv run python -m agents.score "$RUN" > ../<nombre>.score.json`.
 
-## Decisiones para Xabier
+## Decidido por Xabier (2026-11-08)
+
+- **Grok:** su suscripción (SuperGrok / X Premium+, login en navegador), no clave de API. Comprobar en el piloto que cubre el modo sin interfaz; si no, volver a decidir.
+- **Presupuesto:** 60 min por ejecución con corte duro (`timeout 3600`).
+- **Acceso al modelo:** sí, con tope de 10⁶ entradas registradas en `model_calls.jsonl`; la estimación final sin muestrear.
+- **Repeticiones:** 3 por agente, Grok primero.
+- Por defecto (recomendación, sin objeción): modelo argmedian h=4 en el piloto; transcripción = salida JSON de cada CLI + `git diff` final; sin internet, con scipy.
+
+## Decisiones para Xabier (opciones que se presentaron)
 
 1. **Qué modelos.**
    - A) Solo argmedian h=4 (tenemos referencia completa). Pro: puntuación sin dudas, barato. Contra: un solo punto de datos.
