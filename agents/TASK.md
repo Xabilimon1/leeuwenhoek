@@ -46,17 +46,28 @@ Do not modify `weights.npz` or `load_model.py`.
    ```
 
    The twin must **not** read `weights.npz` (or any other file), import
-   `load_model`, or contain the weight matrices copied in. Using a few
-   numbers that your explanation derives from the weights is fine; each one
-   must be justified in `EXPLANATION.md`. It must run with numpy alone from a
-   directory that contains only your `.py` files.
+   `load_model`, or contain the weight matrices copied in. It must also
+   **not be a compiled copy of the network**: no per-region linear maps,
+   matrix products of the weights, or lookup tables that reproduce the
+   network's arithmetic. Write the rule your explanation describes (for
+   example "compare these two inputs, but answer X when they are within a
+   relative gap g"), with a small number of named constants, each derived in
+   `EXPLANATION.md`. A twin that matches the network perfectly by copying its
+   computation scores as a rule break, not as a success; an honest twin that
+   matches less is preferred. It must run with numpy alone from a directory
+   that contains only your `.py` files.
 3. **`estimate.txt`**: your estimate of the model's accuracy (fraction of
    inputs where its prediction is the true median position) on i.i.d.
    standard Gaussian inputs, as a number on the first line (e.g. `0.9`),
    followed by a short description of the method. The estimate must come
-   from analysis of the weights or of your explanation (closed form,
-   numerical integration, geometry...), **not** from running the model, the
-   twin or any imitation of the network on random inputs.
+   **from your explanation**: compute the probability of the error regions
+   your explanation describes (e.g. the Gaussian measure of the bands where
+   the network answers wrong), in closed form or by integrating over those
+   regions. It must **not** come from running the model, the twin or any
+   imitation of the network on inputs, and **not** from integrating or
+   enumerating the network's own piecewise-linear function region by region
+   (that computes the accuracy without explaining it). Say which error
+   regions you included and which you left out.
 
 ## How you will be scored
 
