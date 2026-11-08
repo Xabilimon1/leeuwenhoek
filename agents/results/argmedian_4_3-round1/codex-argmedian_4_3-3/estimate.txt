@@ -1,0 +1,2 @@
+0.983
+Approximate geometric estimate from the narrow near-tie failure bands. The explanation estimates their width as g≈0.04/3.9653≈0.010 from the readout mirror mismatch divided by the smallest input slope. For independent standard Gaussians, a fixed pair difference is N(0,2), so P(|Xi-Xj|<g)≈g/sqrt(pi). The union of the three pair bands is therefore about 3g/sqrt(pi)≈0.017 (overlaps are second order), giving accuracy about 0.983. This is a rough band approximation; it omits the rarer well-separated failures described in EXPLANATION.md.

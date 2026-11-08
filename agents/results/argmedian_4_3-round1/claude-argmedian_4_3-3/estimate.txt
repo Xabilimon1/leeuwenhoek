@@ -1,0 +1,9 @@
+0.984
+Method: accuracy = 1 - (Gaussian measure of the three tie bands described in EXPLANATION.md).
+Each band is thin, so its probability is int int phi(a)^2 phi(c) W(a,c) da dc, where a is the
+tied value, c the third input and W(a,c) the band width (degree-1 homogeneous, constants in
+EXPLANATION.md / twin.py). Computed by 2-D quadrature on a grid (estimate_calc.py), no model,
+twin or network calls. Band A (x2~x3 -> answers 0): 0.0127; band B (x1~x3 -> answers 2): 0.0019;
+band C (x1~x2 -> answers 1): 0.0014. Total error 0.0159 -> accuracy 0.9841.
+Left out: band B in the regime where x2 lies beyond the tie (tiny, partly answers 0 instead of 2),
+the near-triple-tie corrections, and the thin-band (first-order) approximation error.

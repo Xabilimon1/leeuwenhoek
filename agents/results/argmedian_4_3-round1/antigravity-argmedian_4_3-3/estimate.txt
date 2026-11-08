@@ -1,0 +1,32 @@
+0.983983
+The estimate is derived analytically from the mechanistic explanation of the model's error regions under standard Gaussian inputs X ~ N(0, I_3).
+
+Method:
+Because the RNN has no biases and uses ReLU activations, all activations and logits are positively homogeneous of degree 1 (f(c*x) = c*f(x) for c > 0). Furthermore, the network's predictions depend on differences between inputs, which are invariant under translation along (1, 1, 1). In the 2D plane perpendicular to (1, 1, 1), the standard Gaussian distribution projects to an isotropic 2D Gaussian. By rotational symmetry, any conical wedge with opening angle theta has exact Gaussian measure theta / (2*pi).
+
+For a relative gap threshold g, the wedge angle formed by the boundary x_b - x_a = g*(x_a - x_c) in the perpendicular plane is given in closed form by:
+    theta(g) = arctan(sqrt(3) * g / (2 + g))
+and its probability is P(g) = theta(g) / (2*pi).
+
+Error regions included:
+1. Primary error region (x_1 ~ x_2 cancellation band):
+   When x_1 and x_2 are close to each other while x_0 is on one side (either x_0 < min(x_1, x_2) or x_0 > max(x_1, x_2)), the feedforward input at step 3 cancels the recurrent memory of x_1 from step 2. This cancellation destroys the fine difference between x_1 and x_2, leaving only the residual memory of x_0, which activates readout position 0 instead of the true median (1 or 2).
+   - In sector x_0 < x_1 < x_2: relative width g_R = 0.0232 -> P = 0.00316062
+   - In sector x_0 < x_2 < x_1: relative width g_L = 0.0243 -> P = 0.00330864
+   - Symmetrically by sign flip (x <-> -x) in sectors x_2 < x_1 < x_0 and x_1 < x_2 < x_0: P = 0.00316062 + 0.00330864
+   Total primary error probability: 4 wedges, sum = 0.01293853 (1.2939%).
+
+2. Secondary error region (Readout boundary shift near x_2 ~ x_0):
+   When x_0 is the true median, but x_2 is close to x_0, output logit 2 slightly overshoots into position 0 due to readout weight asymmetry (relative gap threshold g_20 = 0.0069 across 2 sign-symmetric sectors).
+   Probability: 2 * P(0.0069) = 0.00189552 (0.1896%).
+
+3. Secondary error region (Readout boundary shift near x_1 ~ x_0):
+   When x_0 is the true median, but x_1 is close to x_0, output logit 1 slightly overshoots into position 0 (relative gap threshold g_10 = 0.0043 across 2 sign-symmetric sectors).
+   Probability: 2 * P(0.0043) = 0.00118281 (0.1183%).
+
+Error regions left out:
+- Higher-order boundary interactions near the triple coincidence point x_0 ~ x_1 ~ x_2 (measure < 1e-4).
+- Very rare edge-case misclassifications between positions 1 and 2 far from boundaries (measure < 5e-5).
+
+Total error probability: 0.01293853 + 0.00189552 + 0.00118281 = 0.01601686 (1.6017%).
+Model accuracy estimate: 1.0 - 0.01601686 = 0.98398314 (~98.40%).

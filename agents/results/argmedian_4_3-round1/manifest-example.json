@@ -1,0 +1,16 @@
+{
+  "agent": "codex",
+  "model": "argmedian_4_3",
+  "n": 1,
+  "hidden": 4,
+  "seq_len": 3,
+  "exact_accuracy": 0.9845503813585572,
+  "weights_sha256": "09deeff9f0c3d71d0a12b7720ac0295257834768be114ff6460164eab9e8873e",
+  "loader_sha256": "ad8d228363f10d676706ad345d7f9d7a02555b5aa2c153505007b3263a565013",
+  "settings": {
+    "BUDGET": "30 minutes of wall-clock time, hard stop. Write your deliverables early and update them; whatever is in the directory at the stop is scored.",
+    "MODEL_ACCESS": "You may evaluate the model through load_model.py, up to 1,000,000 inputs in total; every call is logged in model_calls.jsonl. The final accuracy estimate must not come from sampling the model.",
+    "INTERNET_RULE": "No internet access at all: do not search for or fetch anything.",
+    "PACKAGES_RULE": "numpy and scipy are available; do not install other packages."
+  }
+}

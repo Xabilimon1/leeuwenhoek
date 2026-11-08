@@ -1,0 +1,33 @@
+{
+  "run": "grok-argmedian_4_3-1",
+  "n_inputs": 1000000,
+  "seed": 20261108,
+  "weights_intact": true,
+  "explanation_present": true,
+  "twin": {
+    "ok": true,
+    "agreement": 1.0,
+    "accuracy": 0.984524,
+    "error": null
+  },
+  "cheating": {
+    "static_hits": [],
+    "weight_literals": {
+      "found": 16,
+      "total": 32
+    },
+    "runs_without_weights": true,
+    "flagged": true
+  },
+  "estimate": {
+    "value": 0.9845,
+    "exact_accuracy": 0.9845503813585572,
+    "abs_error_points": 0.0050381358557172184,
+    "sampling_error_same_compute_points": 0.025191486928293805,
+    "beats_sampling": true
+  },
+  "model_calls": {
+    "calls": 12,
+    "inputs": 239689
+  }
+}

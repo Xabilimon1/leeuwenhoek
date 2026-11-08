@@ -1,0 +1,27 @@
+0.9834
+Method:
+We estimate the accuracy of the neural network on i.i.d. standard Gaussian inputs by analytically computing the Gaussian measure of the error regions identified in our mechanistic explanation.
+
+The true median problem partitions R^3 into 6 conical Weyl chambers of opening angle pi/3, corresponding to the 6 permutations of the inputs. The recurrent dynamics (with eigenvalues rotating by 120 degrees per step) maps the sequence into a 2D representation invariant under inversion x -> -x.
+
+Because logit 0 has smaller weight magnitudes in w_out than logits 1 and 2, logit 0 acts as a "default" prediction whenever the recurrent state at step 3 does not strongly push into the active subspaces of logits 1 or 2.
+
+We include the three dominant error regions derived from the weights:
+1. Cluster ambiguity region (x1 ~ x2, predicting 0 instead of 1 or 2):
+   When x1 and x2 are within a relative gap of (G_LEFT + G_RIGHT) * |x0 - (x1+x2)/2| = 0.02431 * |v|, the step-3 activation fails to separate x1 from x2, defaulting to 0. Transforming to independent orthogonal Gaussian coordinates u = x2 - x1 ~ N(0, 2) and v = x0 - (x1+x2)/2 ~ N(0, 1.5), the ratio u/v follows a scaled Cauchy distribution. The probability that |u/v| < 0.02431 across the outlier chambers is:
+   P(cluster error) = (2 / pi) * arctan((sqrt(3)/2) * 0.02431) = 0.01340 (1.340%).
+
+2. Boundary overshoot region for position 2 (x0 ~ x2, predicting 2 instead of 0):
+   When x0 is the median but x2 is within relative gap G_02 = 0.0075 of x0, logit 2 slightly beats logit 0.
+   P(x0 ~ x2 error) = (1 / pi) * arctan((sqrt(3)/2) * 0.0075) = 0.00207 (0.207%).
+
+3. Boundary overshoot region for position 1 (x0 ~ x1, predicting 1 instead of 0):
+   When x0 is the median but x1 is within relative gap G_01 = 0.0040 of x0, logit 1 slightly beats logit 0.
+   P(x0 ~ x1 error) = (1 / pi) * arctan((sqrt(3)/2) * 0.0040) = 0.00110 (0.110%).
+
+Total error probability:
+P(error) = 0.01340 + 0.00207 + 0.00110 = 0.01657.
+Accuracy estimate = 1 - P(error) = 0.98343 (rounded to 0.9834).
+
+Error regions left out:
+We left out higher-order triple-collision regions (where all three inputs are within O(10^-3) of each other) and rare boundary transition effects near the 0.8 / 1.25 ReLU threshold boundaries at step 2, which together account for < 0.05% of the measure.

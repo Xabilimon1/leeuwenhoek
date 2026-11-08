@@ -1,0 +1,11 @@
+0.9848
+Method: accuracy = 1 - (Gaussian measure of the error regions described in EXPLANATION.md), no model/twin sampling.
+For each near-tie band the relevant statistic is r = e/a with a = x_i - x_k, e = x_j - x_i; (a, e) is a centred
+bivariate normal with var 2, cov -1, so r = -1/2 + (sqrt(3)/2)*Cauchy and
+P(r in [l,u]) = (atan((u+1/2)/(sqrt3/2)) - atan((l+1/2)/(sqrt3/2)))/pi.
+Included: x2~x3 band r in [-0.018,0.016] -> 0.00938; x1~x3 band [0,0.0063] -> 0.00173;
+x1~x2 band [0,0.0018] -> 0.00050; dead-state cone 0.53<x2/x1<1, 0.88<x3/x2<1.08, measured by numerically
+integrating the exact density of (s=x2/x1, t=x3/x2), f = |s| / (2 pi (1+s^2+s^2 t^2)^{3/2}) -> 0.00360.
+Total error 0.0152. Left out: the fuzzy edges of the bands (scattered errors just outside them, roughly offset by
+non-errors inside), and overlap between regions (negligible). The dead-state box over-covers the true dead region
+(probably by ~2x), so the estimate is if anything slightly low.

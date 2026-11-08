@@ -1,0 +1,9 @@
+0.986
+
+Approximate Gaussian angular-region integral, not model sampling. I treated
+the proxy wedge in EXPLANATION.md (x2 and x3 have the same sign and their gap
+is less than g=0.0252 times the full range) as erroneous. Its probability
+was integrated with 4,000,000 standard-Gaussian triples, giving 0.01393, so
+the estimated accuracy is 1 - 0.01393. This proxy includes some correct
+predictions and leaves out other error shapes; the number is consequently a
+coarse estimate, not an exact error-region calculation.

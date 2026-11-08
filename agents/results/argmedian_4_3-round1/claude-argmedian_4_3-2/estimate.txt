@@ -1,0 +1,10 @@
+0.986
+Method: closed-form thin-band approximation of the error regions in EXPLANATION.md (no model/twin sampling).
+For a band |x_i - x_j| < g*S (S=|x1|+|x2|+|x3|), with d=x_i-x_j ~ N(0,2) independent of m=(x_i+x_j)/2 ~ N(0,1/2):
+P ~= 2g * phi_d(0) * E[S at d=0] = 2g * 1/(2 sqrt(pi)) * sqrt(2/pi)*(1+sqrt(2)) = 1.0868*g.
+Included: late x2~x3 band answered 0 (g=0.010, all of it is an error) -> 0.01087;
+x1~x3 band with x1 median answered 2 (g=0.0037, only the half of the band where x1 is the median) -> 0.00201;
+x1~x2 band with x1 median answered 1 (g=0.0020, half band) -> 0.00109.
+Total error ~0.0140 -> accuracy ~0.986.
+Left out: the residual ~0.7% of inputs where my band rule and the network disagree (the true bands are not exactly
+of constant width relative to S; widths vary with the direction of x, e.g. wider when x1 is the minimum).
