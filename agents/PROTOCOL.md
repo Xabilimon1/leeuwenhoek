@@ -41,6 +41,16 @@ Recomendación: (1) con clave de API, en el directorio aislado. Los directorios 
 
 Tests: `tests/test_agents.py` (15). Por ejemplo, un gemelo con la regla limpia de la mediana coincide con el modelo un 98,46 % (= su acierto), y un gemelo que carga los pesos, o que importa el cargador de forma ofuscada, queda marcado.
 
+## Ronda 1 (2026-11-08): incidencias y arreglos
+
+- **Grok, tarea v1 (piloto):** gemelo 100 % pero copiando la red (matrices por zonas, 16 de 32 pesos literales) y estimación a 0,005 puntos integrando la función de la red. Correcto pero sin explicación: la tarea se endureció (v2) para prohibir ambas cosas.
+- **Codex:** su sandbox no funciona dentro de sandbox-exec («sandbox_apply: Operation not permitted»); no hizo nada. Arreglo: `--dangerously-bypass-approvals-and-sandbox` dentro de nuestro sandbox. Relanzado.
+- **Corte de tiempo:** Grok ignoró SIGTERM y siguió 40 min. Arreglo: `timeout -k 10` en todos.
+- **Grok, tarea v2:** sin entregables en 30 min (tenía un gemelo del 99,2 % en la cabeza y no lo escribió).
+- **Claude** usó 1,3·10⁶ entradas del modelo (tope 10⁶): regla rota leve.
+- **Claude y Antigravity vieron el acierto muestreado** (permitido por el acceso al modelo) antes de estimar: la estimación no es independiente del muestreo. Por eso el marcador compara con el error del muestreo con el mismo cómputo (métrica de ARC).
+- **Antigravity guarda memoria** (`brain/`, `implicit/`, resúmenes): el lanzador la archiva antes de cada ejecución; comprobado que no recuerda nada después.
+
 ## Lanzamiento y aislamiento (verificado 2026-11-08)
 
 Se lanza con `agents/launch.sh <agente> <ejecución> 30`. Lo que hace:

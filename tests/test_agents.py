@@ -161,3 +161,11 @@ def test_scorer_cli_prints_json(run):
         cwd=root, check=True, capture_output=True, text=True,
     ).stdout
     assert json.loads(out)["twin"]["ok"] is True
+
+
+def test_sampling_error_at_same_compute():
+    from agents.score import sampling_error_points
+
+    # 1 std. error of sampling, in points: 100 * sqrt(p (1 - p) / n)
+    assert abs(sampling_error_points(0.98455, 6_300) - 0.155) < 0.002
+    assert sampling_error_points(0.98455, 0) is None

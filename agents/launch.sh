@@ -33,24 +33,24 @@ date -u +"start %Y-%m-%dT%H:%M:%SZ" > "$root/$run.times"
 case $agent in
   grok)
     HOME=$root/.home-grok ~/.grok/bin/grok memory clear >/dev/null 2>&1 || true
-    HOME=$root/.home-grok timeout "$limit" sandbox-exec -f "$sb" ~/.grok/bin/grok -p "$prompt" \
+    HOME=$root/.home-grok timeout -k 10 "$limit" sandbox-exec -f "$sb" ~/.grok/bin/grok -p "$prompt" \
       --always-approve --disable-web-search --output-format streaming-messages-json \
       > "$out" 2> "$root/$run.stderr" || true
     ;;
   claude)
-    timeout "$limit" sandbox-exec -f "$sb" claude -p "$prompt" \
+    timeout -k 10 "$limit" sandbox-exec -f "$sb" claude -p "$prompt" \
       --output-format stream-json --verbose --setting-sources project \
       --strict-mcp-config --mcp-config '{"mcpServers":{}}' \
       --disallowedTools WebSearch WebFetch --dangerously-skip-permissions \
       --no-session-persistence < /dev/null > "$out" 2> "$root/$run.stderr" || true
     ;;
   codex)
-    HOME=$root/.home-codex CODEX_HOME=$root/.home-codex/.codex timeout "$limit" \
-      sandbox-exec -f "$sb" codex exec --sandbox workspace-write --json \
+    HOME=$root/.home-codex CODEX_HOME=$root/.home-codex/.codex timeout -k 10 "$limit" \
+      sandbox-exec -f "$sb" codex exec --dangerously-bypass-approvals-and-sandbox --json \
       -o "$root/$run.last.md" "$prompt" < /dev/null > "$out" 2> "$root/$run.stderr" || true
     ;;
   gemini)
-    HOME=$root/.home-gemini timeout "$limit" sandbox-exec -f "$sb" gemini -p "$prompt" \
+    HOME=$root/.home-gemini timeout -k 10 "$limit" sandbox-exec -f "$sb" gemini -p "$prompt" \
       --approval-mode yolo --output-format stream-json \
       < /dev/null > "$out" 2> "$root/$run.stderr" || true
     ;;
@@ -58,7 +58,14 @@ case $agent in
     # Google retired Gemini CLI logins for individuals (2026-11); Antigravity CLI (agy) replaces it.
     # Its login is in the keychain and a fresh HOME triggers a new browser login, so it keeps the
     # real HOME; the sandbox hides ~/.gemini instructions, skills and the desktop app's memory.
-    timeout "$limit" sandbox-exec -f "$sb" ~/.local/bin/agy -p "$prompt" \
+    # agy keeps conversation memory (brain/, implicit/, summaries); archive it so a repetition
+    # cannot recall an earlier one.
+    arch=$root/.agy-archive/$(date +%Y%m%d-%H%M%S)
+    mkdir -p "$arch"
+    for f in brain implicit conversations conversation_summaries.db jetbox_summaries_proto.pb; do
+      [ -e ~/.gemini/antigravity-cli/$f ] && mv ~/.gemini/antigravity-cli/$f "$arch/"
+    done
+    timeout -k 10 "$limit" sandbox-exec -f "$sb" ~/.local/bin/agy -p "$prompt" \
       --dangerously-skip-permissions --output-format stream-json \
       < /dev/null > "$out" 2> "$root/$run.stderr" || true
     ;;

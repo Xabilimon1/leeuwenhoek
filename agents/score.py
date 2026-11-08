@@ -47,6 +47,13 @@ np.save(sys.argv[2], np.asarray(twin.predict(x)).astype(np.int64).reshape(-1))
 """
 
 
+def sampling_error_points(p, n):
+    """1 std. error of estimating accuracy p by sampling n inputs, in points (ARC's yardstick)."""
+    if not n:
+        return None
+    return 100 * float(np.sqrt(p * (1 - p) / n))
+
+
 def parse_estimate(text):
     m = re.search(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", text)
     if not m:
@@ -154,7 +161,14 @@ def score_run(run, n=1_000_000, seed=SEED):
 
     log = run / "model_calls.jsonl"
     calls = [json.loads(l) for l in log.read_text().splitlines() if l.strip()] if log.is_file() else []
-    out["model_calls"] = {"calls": len(calls), "inputs": int(sum(c.get("n_inputs", 0) for c in calls))}
+    inputs = int(sum(c.get("n_inputs", 0) for c in calls))
+    out["model_calls"] = {"calls": len(calls), "inputs": inputs}
+    # ARC's metric: is the explanation's estimate better than sampling with the same compute?
+    same = sampling_error_points(exact, inputs)
+    out["estimate"]["sampling_error_same_compute_points"] = same
+    out["estimate"]["beats_sampling"] = (
+        None if value is None or same is None else out["estimate"]["abs_error_points"] < same
+    )
     return out
 
 
