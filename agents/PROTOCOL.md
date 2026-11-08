@@ -41,6 +41,16 @@ Recomendación: (1) con clave de API, en el directorio aislado. Los directorios 
 
 Tests: `tests/test_agents.py` (15). Por ejemplo, un gemelo con la regla limpia de la mediana coincide con el modelo un 98,46 % (= su acierto), y un gemelo que carga los pesos, o que importa el cargador de forma ofuscada, queda marcado.
 
+## Lanzamiento y aislamiento (verificado 2026-11-08)
+
+Se lanza con `agents/launch.sh <agente> <ejecución> 30`. Lo que hace:
+
+- **Sandbox de macOS** (`agents/sandbox.sb`, copiado en `~/agent-runs/.sandbox.sb`): prohíbe leer x-brain, `~/Developer`, `~/IdeaProjects`, la memoria de proyectos de Claude, el CLAUDE.md global, skills, plugins y agentes. Lo heredan todos los procesos del agente (Python incluido). Probado: `cat` y Python reciben `Operation not permitted`.
+- **HOME propio** para Grok, Codex y Gemini, con solo su sesión (`~/agent-runs/.home-<agente>`). Claude no puede (su sesión está en el llavero y con otro HOME dice «Not logged in»): usa el HOME real más el sandbox, `--setting-sources project` y MCP vacío. Preguntado, no ve CLAUDE.md, ni skills del usuario, ni herramientas MCP.
+- **Sin búsqueda web** en todos; la tarea prohíbe internet.
+- Pruebas de sesión, aisladas: Grok OK, Claude OK, Codex OK (también ejecutando Python dentro de su propio sandbox anidado). **Gemini falla**: «This account requires setting the GOOGLE_CLOUD_PROJECT», también con el HOME real. Hay que iniciar sesión con otra cuenta de Google, poner un proyecto de Google Cloud o usar una clave de AI Studio.
+- El piloto de Grok (`grok-argmedian_4_3-1`, 16:28) se lanzó solo con el HOME aislado, antes de tener el sandbox: revisar su transcripción por lecturas fuera del directorio.
+
 ## Cómo lanzar cada agente sin interfaz
 
 Todo desde dentro del directorio de ejecución, con el prompt `"Read TASK.md and do the task."`. Comandos sacados de `--help` el 2026-11-08; **ninguno probado de verdad** [sin verificar].
