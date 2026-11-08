@@ -28,6 +28,10 @@ limit=$((minutes * 60))
 [ -d "$dir" ] || { echo "no run directory $dir" >&2; exit 1; }
 [ -f "$sb" ] || { echo "no sandbox profile $sb" >&2; exit 1; }
 cd "$dir"
+# Same Python for every agent: ~/agent-runs/.venv (3.13, numpy, scipy). Round 1 had no scipy and
+# the first python3 on PATH (Homebrew) had no numpy either.
+export PATH="$root/.venv/bin:$PATH"
+"$root/.venv/bin/python" -c "import numpy, scipy" || { echo "run venv lacks numpy/scipy" >&2; exit 1; }
 date -u +"start %Y-%m-%dT%H:%M:%SZ" > "$root/$run.times"
 
 case $agent in
