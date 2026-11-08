@@ -73,4 +73,6 @@ keywords: ["mechanistic interpretability", "AlgZoo", "ARC", "RNN", "argmedian"]
 **Tus decisiones pendientes**
 1. ~~¿h=4 cerrado o primero los 0,064 puntos?~~ Decidido 2026-10-30: primero los 0,064 puntos.
 2. ~~Título.~~ «Taking apart a 32-number network».
-3. ¿Post solo en xabier.me o también LessWrong desde el principio?
+3. ~~¿Post solo en xabier.me o también LessWrong?~~ Las dos. Texto escrito a mano por Xabier (política de LessWrong); Claude solo corrige contenido.
+4. ~~¿Uno o dos posts?~~ Decidido 2026-11-08: dos. Post 1 = §1-§4 del boceto (qué hace la red, dónde falla, la vuelta, acierto exacto y gemelo desde cero). Post 2 = la ley del error y el hueco de 0,064 puntos.
+5. Inglés para LessWrong: Xabier traduce con un traductor clásico, no un LLM, y lo declara («written by hand in Spanish, machine-translated»). Claude no traduce.
