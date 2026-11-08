@@ -54,6 +54,14 @@ case $agent in
       --approval-mode yolo --output-format stream-json \
       < /dev/null > "$out" 2> "$root/$run.stderr" || true
     ;;
+  antigravity)
+    # Google retired Gemini CLI logins for individuals (2026-11); Antigravity CLI (agy) replaces it.
+    # Its login is in the keychain and a fresh HOME triggers a new browser login, so it keeps the
+    # real HOME; the sandbox hides ~/.gemini instructions, skills and the desktop app's memory.
+    timeout "$limit" sandbox-exec -f "$sb" ~/.local/bin/agy -p "$prompt" \
+      --dangerously-skip-permissions --output-format stream-json \
+      < /dev/null > "$out" 2> "$root/$run.stderr" || true
+    ;;
   *) echo "unknown agent $agent" >&2; exit 1 ;;
 esac
 
