@@ -32,6 +32,12 @@ cd "$dir"
 # the first python3 on PATH (Homebrew) had no numpy either.
 export PATH="$root/.venv/bin:$PATH"
 "$root/.venv/bin/python" -c "import numpy, scipy" || { echo "run venv lacks numpy/scipy" >&2; exit 1; }
+# The isolated HOMEs hold copies of the logins; the real ones get refreshed, so copy them fresh
+# (a stale Codex copy failed with "unauthorized (401)" on 2026-11-09).
+case $agent in
+  codex) cp ~/.codex/auth.json "$root/.home-codex/.codex/auth.json" ;;
+  grok) cp ~/.grok/auth.json "$root/.home-grok/.grok/auth.json" ;;
+esac
 date -u +"start %Y-%m-%dT%H:%M:%SZ" > "$root/$run.times"
 
 case $agent in
