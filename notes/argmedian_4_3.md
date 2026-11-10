@@ -76,20 +76,23 @@ Sugeridas por Jacob Hilton. Ambas usan la estimación que se recalcula desde los
   - Muestreo hasta el mismo error: 6.814 muestras = 1,0·10⁶ FLOPs → **la estimación es solo 1,8× más barata**. Con los mismos FLOPs, el muestreo (3.879 muestras) da 0,198 puntos de error.
   - Por encima de ~10⁶ FLOPs gana el muestreo: el error de la estimación es un sesgo fijo y no baja.
   - El coste lo domina el algoritmo genérico de conos (todas las parejas de planos, O(k³)). Uno específico sería más barato [sin medir].
-- **Ruido en los pesos** (`scripts/jacob_noise.py`): cada peso × (1 + ε·z), 20 redes por nivel, semilla 2026. Exacto frente a muestreo comprobado en 9 redes con ruido (el mismo desfase de ~2 e.t. que la red original con esas muestras).
+  - Abogado del diablo, fuerza bruta: el acierto exacto (`flops.exact_flops`, en su versión más ligera, solo las piezas que predicen la mediana; test bit a bit) cuesta **7,3·10⁶ FLOPs = 12,8× la estimación**, con error 0. Con ese presupuesto el muestreo da 0,055 puntos. En una red tan pequeña, la fuerza bruta exacta ya gana al muestreo: la estimación queda entre las dos y su valor no está en el ahorro.
+  - No se cuenta lo que costó encontrar la explicación (se miraron muestras y piezas exactas).
+- **Ruido en los pesos** (`scripts/jacob_noise.py`): cada peso × (1 + ε·z), 20 redes por nivel, semilla 2026. Exacto frente a muestreo comprobado en 9 redes con ruido (el mismo desfase de ~2 e.t. que la red original con esas muestras). «Caída capturada» = cambio de la estimación / cambio del acierto, por red.
 
-  | ε | cambio de acierto, media (máx.) | error de la estimación, media ± d.t. | error si no se recalcula | cobertura |
-  |---|---|---|---|---|
-  | 0 | — | +0,149 | 0,149 | 89,8 % |
-  | 0,1 % | 0,31 (0,68) | +0,20 ± 0,05 | 0,45 | 88,4 % |
-  | 0,3 % | 1,01 (2,58) | +0,38 ± 0,15 | 1,16 | 84,1 % |
-  | 1 % | 5,7 (13,2) | +2,2 ± 1,4 | 5,8 | 68,2 % |
-  | 3 % | 15,7 (29,2) | +6,3 ± 2,9 | 15,9 | 58,3 % |
-  | 10 % | 48,6 (72,3) | +18 ± 10 | 48,8 | 54,8 % |
+  | ε | cambio de acierto, media (máx.) | error de la estimación, media ± d.t. | error si no se recalcula | caída capturada, mediana [p10, p90] | cobertura |
+  |---|---|---|---|---|---|
+  | 0 | — | +0,149 | 0,149 | — | 89,8 % |
+  | 0,1 % | 0,31 (0,68) | +0,20 ± 0,05 | 0,45 | 85 % [59, 94] | 88,4 % |
+  | 0,3 % | 1,01 (2,58) | +0,38 ± 0,15 | 1,16 | 77 % [62, 89] | 84,1 % |
+  | 1 % | 5,7 (13,2) | +2,2 ± 1,4 | 5,8 | 65 % [45, 73] | 68,2 % |
+  | 3 % | 15,7 (29,2) | +6,3 ± 2,9 | 15,9 | 56 % [44, 79] | 58,3 % |
+  | 10 % | 48,6 (72,3) | +18 ± 10 | 48,8 | 62 % [50, 81] | 54,8 % |
 
-  - La red es muy frágil: con un 0,3 % de ruido el acierto baja en 40 de 40 redes. Está en un óptimo afilado.
-  - Con ruido pequeño (≤ 0,3 %) la explicación generaliza: la estimación recalculada sigue la caída del acierto (error 0,20-0,38 frente a 0,45-1,16 sin recalcular).
-  - Con ruido ≥ 1 % aparecen errores que la lista no tiene y la estimación sigue solo un ~60 % de la caída. El mayor que falta (ε = 1 %, una red): la banda del empate del paso 3 en el lado x₁ < 0 (camino 0011-1100-0101) ya no responde x₁, sino x₃. **La banda resiste el ruido; la regla «en el empate responde x₁» no**. Hipótesis: depende de una cancelación fina de los pesos de salida [sin verificar].
+  - Con ruido pequeño la explicación generaliza: la estimación recalculada captura el 85 % (ε = 0,1 %) y el 77 % (0,3 %) de la caída del acierto. «Error si no se recalcula» es un rival débil (cualquier cosa que se mueva le gana); la medida buena es la caída capturada.
+  - Con ruido ≥ 1 % aparecen errores que la lista no tiene y la estimación captura ~60 %. El mayor que falta (ε = 1 %, una red): la banda del empate del paso 3 en el lado x₁ < 0 (camino 0011-1100-0101) ya no responde x₁, sino x₃. **La banda resiste el ruido; la regla «en el empate responde x₁» no** [por qué, sin verificar].
+  - **La fragilidad está en W_hh**: con ruido del 0,3 % solo en una matriz, el acierto cae 1,09 puntos (W_hh, 16 pesos), 0,23 (salida, 12) y 0,17 (entrada, 4). Descarta la hipótesis previa de los pesos de salida y enlaza con «por qué la red necesita W_hh con dos decimales».
+  - **No está exactamente en un óptimo**: con ε = 0,01 % el acierto sube en 13 de 20 redes; con 0,03 %, en 8 de 20; con 0,1 %, en 6 de 20; con 0,3 %, baja en 20 de 20 (y en 40 de 40 en otra tanda). La caída crece más rápido que ε (0,18 → 1,24 puntos al triplicar ε, cerca de cuadrática).
 
 ## Lo que queda sin explicar
 - Errores restantes (0,26 %): piezas pequeñas de los caminos mezclados de los pasos 2 y 3.

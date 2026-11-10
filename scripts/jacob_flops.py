@@ -2,7 +2,8 @@
 
 Two comparisons, both against the exact accuracy computed from the weights:
   - FLOPs sampling needs to reach the estimate's error (1 standard error);
-  - the error sampling reaches with the estimate's FLOPs.
+  - the error sampling reaches with the estimate's FLOPs;
+  - the cost of the brute-force exact accuracy (no explanation, error 0).
 Sampling cost counts only the model (forward pass, argmax, true median), not the
 random numbers, which favours sampling.
 
@@ -12,7 +13,7 @@ Usage: uv run python scripts/jacob_flops.py
 import numpy as np
 
 from leeuwenhoek.exact import exact_accuracy
-from leeuwenhoek.flops import estimate_flops, forward_flops
+from leeuwenhoek.flops import estimate_flops, exact_flops, forward_flops
 from leeuwenhoek.models import load_argmedian
 
 _, w = load_argmedian(4, 3)
@@ -35,3 +36,8 @@ n_same = flops / per_sample
 se = np.sqrt(p * (1 - p) / n_same)
 print(f"sampling with the estimate's FLOPs: {n_same:,.0f} samples, error {100 * se:.3f} points"
       f"  ({se / err:.1f}x the estimate's error)")
+
+acc_bf, flops_bf = exact_flops(w)
+n_bf = flops_bf / per_sample
+print(f"\nbrute-force exact accuracy (error 0): {flops_bf:,} FLOPs = {flops_bf / flops:.1f}x the estimate;"
+      f" sampling with that budget: {n_bf:,.0f} samples, error {100 * np.sqrt(p * (1 - p) / n_bf):.3f} points")

@@ -30,6 +30,16 @@ def test_counted_cone_fraction_matches_on_random_and_degenerate_cones():
         assert counted_cone_fraction(normals, Counter()) == cone_fraction(normals)
 
 
+def test_exact_flops_reproduces_the_exact_accuracy():
+    from leeuwenhoek.exact import exact_accuracy
+    from leeuwenhoek.flops import exact_flops
+
+    _, w = load_argmedian(4, 3)
+    acc, flops = exact_flops(w)
+    assert acc == exact_accuracy(w)[0]
+    assert flops > estimate_flops(w)[1]
+
+
 def test_estimate_flops_reproduces_the_estimate():
     _, w = load_argmedian(4, 3)
     est, flops, _ = estimate_flops(w)

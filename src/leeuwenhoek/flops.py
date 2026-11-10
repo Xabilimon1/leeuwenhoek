@@ -142,9 +142,9 @@ def counted_cone_fraction(normals, c):
 # --- linear.py / exact.step_normals, counted -----------------------------------
 
 
-def _path_matrices(w, masks, c):
+def _path_matrices(w, masks, c, seq_len=None):
     w_ih, w_hh, w_out = (np.asarray(w[k], np.float64) for k in ("w_ih", "w_hh", "w_out"))
-    L, hd = len(masks), len(w_ih)
+    L, hd = len(masks) if seq_len is None else seq_len, len(w_ih)
     h = np.zeros((hd, L))
     pre = []
     for t, d in enumerate(masks):
@@ -160,6 +160,50 @@ def _path_matrices(w, masks, c):
 def _step_normals(pre_t, mask, c):
     c.add(len(pre_t) * (3 + 2 + 1))  # abs, max of 3, threshold per neuron
     return [z if on else -z for z, on in zip(pre_t, mask) if np.abs(z).max() > 1e-12]
+
+
+# --- exact.exact_accuracy, counted (the brute-force baseline) -----------------
+
+
+def exact_flops(w):
+    """(exact accuracy, FLOPs) of exact.pieces, keeping only the pieces that predict
+    the median: the leanest form of the brute force, so the comparison favours it."""
+    w = {k: np.asarray(v, np.float64) for k, v in w.items()}
+    c = Counter()
+    masks = [np.array(m, float) for m in product((0, 1), repeat=len(w["w_ih"]))]
+
+    def extend(prefix, normals):
+        t = len(prefix)
+        if t == 3:
+            yield prefix, normals
+            return
+        for m in masks:
+            _, pre = _path_matrices(w, prefix + [m], c, seq_len=3)
+            new = normals + _step_normals(pre[t], m, c)
+            if counted_cone_fraction(new, c) > 0:
+                yield from extend(prefix + [m], new)
+
+    acc = 0
+    for path, normals in extend([], []):
+        M, _ = _path_matrices(w, path, c)
+        for o in ORDERINGS:
+            base = normals + ordering_normals(o)
+            if counted_cone_fraction(base, c) == 0:
+                continue
+            k = o[1]
+            diffs = [M[k] - M[j] for j in range(3) if j != k]
+            c.add(2 * 3 + 2 * (3 + 2 + 1))  # differences, all-zero test
+            if all(np.abs(d).max() < 1e-12 for d in diffs):
+                if k != 0:
+                    continue
+                cone = base
+            else:
+                cone = base + diffs
+            p = counted_cone_fraction(cone, c)
+            if p > 0:
+                acc += p
+                c.add(1)
+    return acc, c.n
 
 
 # --- mechanisms.mechanism_cones + estimate.error_of_cone, counted ---------------
