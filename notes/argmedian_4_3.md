@@ -61,12 +61,35 @@ Código: `src/leeuwenhoek/design.py` (tests en `tests/test_design.py`); script: 
 Script: `scripts/estimate_argmedian_4_3.py`; método en `src/leeuwenhoek/estimate.py` (tests en `tests/test_estimate.py`).
 - Cada zona de error explicada es un cono poliédrico; su probabilidad gaussiana = ángulo sólido / 4π, exacto (triangulación + Van Oosterom-Strackee). No se evalúa el modelo.
 - v1 (bandas de los pasos 2 y 3): estimación 98,97 %, error 0,52 puntos (~560 evaluaciones de muestreo).
-- **v2 (+ giros + estado muerto): estimación 98,610 %; acierto exacto 98,455 %; error 0,155 puntos**, lo que el muestreo consigue con ~6.300 evaluaciones del modelo. El coste de la estimación es de unas decenas de conos [coste comparado sin medir].
+- **v2 (+ giros + estado muerto): estimación 98,610 %; acierto exacto 98,455 %; error 0,155 puntos**, lo que el muestreo consigue con ~6.300 evaluaciones del modelo. El coste de la estimación está medido abajo, en «Comprobaciones de ARC».
 - Coincide con el acierto del gemelo por muestreo (98,616 %): la estimación calcula el gemelo.
 - **Cobertura exacta** (`scripts/exact_error_budget.py`): las zonas explicadas contienen el 83,0 % de los errores del modelo, con precisión 92,2 % [suma de solapes por zona; si dos zonas se solapan cuenta doble]. Quedan 0,263 % de masa de error repartidos en piezas pequeñas (≤ 0,03 % cada una), sobre todo en los caminos mezclados.
 - Algunas franjas de los giros tienen precisión baja en uno de los dos lados espejo (33-77 %): los pesos originales no son exactamente simétricos y ahí se nota.
 - Sesgo conocido: sobreestima el acierto porque faltan zonas de error.
 - Limitación: los coeficientes salen de los pesos, pero qué camino mezclado usar se eligió por frecuencia en una muestra.
+
+### Comprobaciones de ARC (2026-11-10)
+Sugeridas por Jacob Hilton. Ambas usan la estimación que se recalcula desde los pesos (`mechanisms.mechanism_cones`, 22 conos con espejo y muertos; 98,6045 %, error +0,149 puntos).
+- **FLOPs** (`scripts/jacob_flops.py`, `src/leeuwenhoek/flops.py`; tests: la versión contada da la estimación bit a bit). Convención: 1 FLOP por +, −, ×, ÷, comparación, abs, raíz, cos, arctan2.
+  - Estimación: **570.244 FLOPs** (construir conos 5.292; buscar caminos muertos 194.998; probabilidades 369.954).
+  - Una evaluación del modelo: 147 FLOPs (sin contar el generador aleatorio, a favor del muestreo).
+  - Muestreo hasta el mismo error: 6.814 muestras = 1,0·10⁶ FLOPs → **la estimación es solo 1,8× más barata**. Con los mismos FLOPs, el muestreo (3.879 muestras) da 0,198 puntos de error.
+  - Por encima de ~10⁶ FLOPs gana el muestreo: el error de la estimación es un sesgo fijo y no baja.
+  - El coste lo domina el algoritmo genérico de conos (todas las parejas de planos, O(k³)). Uno específico sería más barato [sin medir].
+- **Ruido en los pesos** (`scripts/jacob_noise.py`): cada peso × (1 + ε·z), 20 redes por nivel, semilla 2026. Exacto frente a muestreo comprobado en 9 redes con ruido (el mismo desfase de ~2 e.t. que la red original con esas muestras).
+
+  | ε | cambio de acierto, media (máx.) | error de la estimación, media ± d.t. | error si no se recalcula | cobertura |
+  |---|---|---|---|---|
+  | 0 | — | +0,149 | 0,149 | 89,8 % |
+  | 0,1 % | 0,31 (0,68) | +0,20 ± 0,05 | 0,45 | 88,4 % |
+  | 0,3 % | 1,01 (2,58) | +0,38 ± 0,15 | 1,16 | 84,1 % |
+  | 1 % | 5,7 (13,2) | +2,2 ± 1,4 | 5,8 | 68,2 % |
+  | 3 % | 15,7 (29,2) | +6,3 ± 2,9 | 15,9 | 58,3 % |
+  | 10 % | 48,6 (72,3) | +18 ± 10 | 48,8 | 54,8 % |
+
+  - La red es muy frágil: con un 0,3 % de ruido el acierto baja en 40 de 40 redes. Está en un óptimo afilado.
+  - Con ruido pequeño (≤ 0,3 %) la explicación generaliza: la estimación recalculada sigue la caída del acierto (error 0,20-0,38 frente a 0,45-1,16 sin recalcular).
+  - Con ruido ≥ 1 % aparecen errores que la lista no tiene y la estimación sigue solo un ~60 % de la caída. El mayor que falta (ε = 1 %, una red): la banda del empate del paso 3 en el lado x₁ < 0 (camino 0011-1100-0101) ya no responde x₁, sino x₃. **La banda resiste el ruido; la regla «en el empate responde x₁» no**. Hipótesis: depende de una cancelación fina de los pesos de salida [sin verificar].
 
 ## Lo que queda sin explicar
 - Errores restantes (0,26 %): piezas pequeñas de los caminos mezclados de los pasos 2 y 3.
