@@ -1,0 +1,14 @@
+0.99947
+Method: the explanation says the network computes the exact median position except inside thin wedges next to the
+three tie planes x_i = x_j, where the decision boundary is displaced from the tie by d*(s, x_k) = r * g(theta)
+(homogeneous of degree 1, since the network has no biases; s = (x_i+x_j)/2, (s, x_k) = r(cos theta, sin theta)).
+Inside the band between the tie plane and the displaced boundary the network gives the neighbour instead of the median.
+For d = x_i - x_j ~ N(0,2), independent of (s ~ N(0,1/2), x_k ~ N(0,1)), the band has probability
+  P_err(pair) = p_d(0) * E[ r |g(theta)| ],  p_d(0) = 1/(2 sqrt(pi)),
+which I integrated in closed form in r (int r^2 exp(-a r^2) dr = sqrt(pi)/(4 a^1.5)) and numerically over theta,
+using the boundary offset g(theta) measured by bisection on a 720-angle grid (the error-band description, not the
+network's region-by-region function). Results: pair(1,2) 2.2e-4, pair(1,3) 2.2e-4, pair(2,3) 0.8e-4 (1-indexed),
+total error 5.2e-4 -> accuracy 0.99948; I round slightly down (0.99947) because angles within ~2 degrees of the
+triple-tie direction were excluded from the grid (~4% of angles, so ~+2e-5 error unaccounted).
+Included: the three near-tie bands. Left out: anything else (I found no errors away from ties in 200k samples).
+(For reference only, not used for the number: a 200k-sample run of the model gave 0.99944.)

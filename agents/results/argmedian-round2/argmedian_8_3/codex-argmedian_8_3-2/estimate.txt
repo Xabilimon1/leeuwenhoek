@@ -1,0 +1,2 @@
+0.999425
+Gaussian near-tie band approximation: for each of the three input pairs, integrate the N(0,2) probability of |Xi-Xj| < delta with effective width delta=3.4e-4 from the local weight-derived readout margin. Union probability is approximately 3*erf(delta/2)=0.000575. Includes pairwise near-tie bands; leaves out active-set variation in their widths and errors away from ties.

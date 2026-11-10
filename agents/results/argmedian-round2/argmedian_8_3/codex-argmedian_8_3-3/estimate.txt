@@ -1,0 +1,2 @@
+0.99938
+Integrate the three one-sided near-tie wedges 0 < s(Xi-Xj) < 0.00075|Xk-(Xi+Xj)/2| under independent standard Gaussians, with s selecting the displaced side. Here Xi-Xj is N(0,2) and independent of Xk-(Xi+Xj)/2, which is N(0,3/2); each wedge has small-width probability gamma*sqrt(3)/(2*pi). Sum the three pair probabilities and omit higher-order overlaps, multiway ties, and exceptional tails.

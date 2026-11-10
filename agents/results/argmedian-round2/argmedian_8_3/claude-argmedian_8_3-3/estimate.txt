@@ -1,0 +1,11 @@
+0.99957
+Method: from the explanation, the net's only errors are near-ties between the median and its
+closer neighbour, where the pairwise comparison x_i - x_j is made against a shifted threshold
+d = A*m + B*x_k (m = pair mean, x_k = third input; 12 constants A,B per pair x side in twin.py).
+Error probability = sum over 3 pairs x 2 sides of  p_g(0) * E[ |A m + B x_k| * 1{x_k on that side of m} ],
+with g = x_i - x_j ~ N(0,2) (density at 0 = 1/sqrt(4*pi)), m ~ N(0,1/2), x_k ~ N(0,1) independent;
+the expectation was computed by 2-D grid quadrature. Total P_err = 4.3e-4.
+Included: the six median/neighbour near-tie bands (first order in the band width).
+Left out: triple near-ties (all three inputs close, where the boundaries bend), the sign-region
+dependence of the shift coefficients (I used one pooled linear fit per pair/side), and
+second-order terms. These omissions most likely make the true error a bit larger than 4.3e-4.

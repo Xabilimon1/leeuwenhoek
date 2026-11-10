@@ -1,0 +1,13 @@
+0.99946
+Method: from the explanation, the network is the exact median except in thin wedge bands around
+each pairwise tie x_i = x_j, where its effective comparison threshold is x_i - x_j = D_ij(v, w)
+(v = pair mean, w = third input, D homogeneous of degree 1, |D| ~ 1e-3 * r). The error probability
+of pair (i,j) is the Gaussian measure of the band between 0 and D_ij: since u = x_i - x_j ~ N(0,2) is
+independent of (v ~ N(0,1/2), w ~ N(0,1)), P_ij = phi_u(0) * E|D_ij(v,w)| with phi_u(0) = 1/(2 sqrt(pi)).
+E|D| was computed by grid quadrature over (v, w) using the measured boundary offset d_ij(theta) on the
+unit circle (720 angles, D = r*d(theta)). Sum over the 3 pairs: 0.000544 -> accuracy 0.99946.
+(Pairs: 01 ~0.00008, 02 ~0.00022, 12 ~0.00022.) Included: all three pairwise tie bands, both the
+median/max and median/min ties. Approximated: the ~+-4 degree cones around triple near-ties (v ~ w),
+where the band offset was interpolated from neighbouring angles rather than measured. Left out:
+second-order (band-width squared) terms. Using the smoother 24-constant linear fit of D (the twin's)
+instead gives 0.99953.

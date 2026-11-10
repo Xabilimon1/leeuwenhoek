@@ -1,0 +1,14 @@
+0.4103
+Method: from the rule in EXPLANATION.md the network answers 1 inside a window
+W(x1,x2) for x3 and 0 everywhere else (it never answers 2).  So
+accuracy = P(median=0) - P(median=0, x in W) + P(median=1, x in W)
+         = 1/3 - 0.00297 + (0.06279 + 0.01715) = 0.4103.
+Each term was integrated over the Gaussian: x3 in closed form with Phi over
+the window/median intervals, (x1,x2) by Gauss-Legendre quadrature split at the
+kinks (integrate_rule.py).  Error regions included: all inputs whose median is
+position 2 (always wrong, 1/3), median-1 inputs outside W (wrong answer 0),
+median-0 inputs inside W (wrong answer 1).  Left out: the exact geometry of the
+rare "x1>0 but x2 > 79*x1" sub-branch (treated as the reset branch) and the
+a-unit edge effects in it; this is where the twin disagrees with the network
+(~0.015% of inputs), so the effect on the estimate is < 2e-4.
+No model, twin or network imitation was run on inputs to obtain this number.

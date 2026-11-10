@@ -1,0 +1,33 @@
+{
+  "run": "claude-argmedian_8_3-2",
+  "n_inputs": 1000000,
+  "seed": 20261108,
+  "weights_intact": true,
+  "explanation_present": true,
+  "twin": {
+    "ok": true,
+    "agreement": 0.999619,
+    "accuracy": 0.999452,
+    "error": null
+  },
+  "cheating": {
+    "static_hits": [],
+    "weight_literals": {
+      "found": 0,
+      "total": 96
+    },
+    "runs_without_weights": true,
+    "flagged": false
+  },
+  "estimate": {
+    "value": 0.99947,
+    "exact_accuracy": 0.9994549023497373,
+    "abs_error_points": 0.0015097650262640983,
+    "sampling_error_same_compute_points": 0.004395513347122805,
+    "beats_sampling": true
+  },
+  "model_calls": {
+    "calls": 176,
+    "inputs": 281980
+  }
+}

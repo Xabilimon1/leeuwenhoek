@@ -1,0 +1,3 @@
+0.9994
+
+Approximate analytic estimate from the three narrow pairwise near-tie bands described in EXPLANATION.md. Treat each band's effective angular half-width as c = 0.00027; for isotropic Gaussian directions its probability is c/sqrt(2), so their union is approximately 3c/sqrt(2) = 0.000573. This includes the main pairwise tie neighborhoods and leaves out their detailed width variation and three-way overlap geometry.

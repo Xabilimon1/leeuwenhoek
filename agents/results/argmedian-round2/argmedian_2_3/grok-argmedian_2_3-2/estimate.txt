@@ -1,0 +1,12 @@
+0.41017126
+Accuracy of the decision rule in EXPLANATION.md on i.i.d. standard normal inputs, computed as 1 minus the Gaussian measure of three error regions. No model, twin, or network sampling was used.
+
+Always-wrong region (median at position 2): the readout cannot emit class 2, so this region has probability exactly 1/3.
+
+Missed median-at-1: probability 1/3 - 0.079808331378 = 0.253525001955. The 0.079808331378 is the measure of the answer-1 bands (fresh anchor, v-only margin band, and the rare K-branch) intersected with "x2 lies between x1 and x3".
+
+False answer 1 while the median is at position 0: probability 0.002970402985, the thin band tau*x1 < x2 < eta*x1 inside which the margin test fires even though x1 is the middle value.
+
+1 - 1/3 - 0.253525001955 - 0.002970402985 = 0.41017126.
+
+Those two band measures are integrals of the cones described in EXPLANATION.md. The direction of (x1, x2) is uniform in angle; the radius integrates in closed form against Phi, leaving a 1D angular integral evaluated by adaptive quadrature on the smooth sectors (absolute error below 1e-11). Closed pieces used along the way: P(x2 < x1 <= 0 and x3 > x1) = 1/12, P(x1 < x2 <= 0 and x3 < x1) = 1/48, P(x2 < 0 < x1 and x3 > x1) = 1/16, and P(x1 < 0 < x2 < x3) = 1/16 minus the cap x3 > T*x2 of mass about 3.9e-5. No region of the rule was left out of the integral.

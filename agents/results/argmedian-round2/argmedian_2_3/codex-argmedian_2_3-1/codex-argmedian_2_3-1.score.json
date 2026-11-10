@@ -1,0 +1,33 @@
+{
+  "run": "codex-argmedian_2_3-1",
+  "n_inputs": 1000000,
+  "seed": 20261108,
+  "weights_intact": true,
+  "explanation_present": true,
+  "twin": {
+    "ok": true,
+    "agreement": 0.965073,
+    "accuracy": 0.381117,
+    "error": null
+  },
+  "cheating": {
+    "static_hits": [],
+    "weight_literals": {
+      "found": 1,
+      "total": 12
+    },
+    "runs_without_weights": true,
+    "flagged": false
+  },
+  "estimate": {
+    "value": 0.381,
+    "exact_accuracy": 0.41017126172687207,
+    "abs_error_points": 2.9171261726872064,
+    "sampling_error_same_compute_points": 4.399370843929917,
+    "beats_sampling": true
+  },
+  "model_calls": {
+    "calls": 1,
+    "inputs": 125
+  }
+}

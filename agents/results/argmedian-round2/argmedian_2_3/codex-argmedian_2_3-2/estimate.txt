@@ -1,0 +1,12 @@
+0.4071
+Estimated by integrating the Gaussian probability of the threshold-rule
+regions derived in EXPLANATION.md, not by sampling the model. For a=x1 and
+b=x2, let q=max(b,0), T=0.870246*q when a<=0; for a>0 let
+q=max(b-0.870246*a,0), T=1.986058*q. The approximate rule predicts 1 on
+q>0, x3>T, and 0 elsewhere. I integrated the Gaussian mass where this rule
+is correct: for class 1, a<b<x3 and the rule selects 1; for class 0, a lies
+between b and x3 and the rule selects 0. The x3 intervals reduce to normal
+CDF/tail probabilities and the remaining two-dimensional Gaussian integral
+was evaluated by adaptive quadrature (0.407087). This includes the principal
+carry threshold region and leaves out rare step-3 survival of hidden unit 1
+and resulting mixed-state readout boundary shifts.

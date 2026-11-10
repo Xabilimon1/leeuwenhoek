@@ -1,0 +1,17 @@
+0.410
+Closed-form 3D Gaussian orthant (arcsin) measure of the explanation's error regions, not from running the model or twin.
+
+The network never predicts 2, so every true-median-2 input (probability 1/3) is wrong. It predicts 1 on region A = {x0<0, x1>0, x2>k x1} and region B = {x0>0, x1>k x0, d(x1-k x0)<x2<U(x1-k x0)}, else 0.
+
+accuracy = P(true=0 and not R) + P(true=1 and R)
+         = 1/3 - P(B and true=0) + P(A and true=1) + P(B and true=1)
+         = 1/3 + 1/16 + 0.017259 - 0.002970
+         = 0.41012
+
+P(A and true=1) = P(x0<0, x1>0, x2>x1) = 1/16 exactly (orthant correlations 0, 0, -1/√2).
+P(B and true=1) ≈ 0.017259 and P(B and true=0) ≈ 0.002970 come from splitting B into cones along x1=x0, x2=x1, x2=x0 and x1 = m x0 (m = d k/(d-1)), each evaluated with
+P(n1·x>0, n2·x>0, n3·x>0) = 1/8 + (arcsin ρ12 + arcsin ρ13 + arcsin ρ23)/(4π).
+The U-cap is subtracted as a second cone with d replaced by U.
+
+Included: all true-2 errors; region-A true-1 hits; region-B true-1 hits and true-0 false alarms, with the U cap.
+Left out: the K_u≈79 unit-u carry-over wedge (probability ~0.002) and the U_A≈2045 tail of A; both change accuracy by well under 0.001.
