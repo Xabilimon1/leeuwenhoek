@@ -10,7 +10,8 @@ is the median, and gets it right 98.46% of the time.
 
 ![Every input direction on one map, coloured by the network's answer; errors in white](figures/blog/en/1-sphere.png)
 
-Written up in [Taking apart a 32-number network](https://xabier.me/posts/2026-11-08-taking-apart-a-32-number-network).
+Written up in [Taking apart a 32-number network](https://xabier.me/posts/2026-11-08-taking-apart-a-32-number-network)
+(also on the [EA Forum](https://forum.effectivealtruism.org/posts/boaXwxTaB2pYuyGmj/taking-apart-a-32-number-network-1)).
 
 ## What the network does
 
