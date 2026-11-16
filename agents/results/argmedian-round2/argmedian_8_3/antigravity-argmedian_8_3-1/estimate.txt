@@ -1,0 +1,29 @@
+0.999337
+
+Method Description:
+The model's accuracy on i.i.d. standard Gaussian inputs is estimated from the geometric measure of its error regions in R^3.
+
+Because the model has no biases and uses ReLU activations, its linear regions are cones radiating from the origin. The true argmedian partition of R^3 is formed by the three planes x0 = x1, x1 = x2, and x2 = x0, which all intersect along the diagonal axis spanned by u = (1, 1, 1)^T / sqrt(3). In the orthogonal 2D plane P = u^perp, standard 3D Gaussian measure projects to an isotropic 2D Gaussian N(0, I_2), where the 6 true permutation cones appear as 6 equal sectors of angle pi/3 (60 degrees) each.
+
+The network implements pairwise linear comparisons with small recurrent gain mismatches, resulting in decision boundaries that are slightly tilted relative to the true planes. Each boundary ray k in {1..6} between adjacent permutation regions has an angular tilt Delta theta_k relative to the true median boundary:
+- Ray 1 (x0 = x1 < x2, classes 0 vs 1): Delta theta_1 = 0.000058 rad (0.0033 deg)
+- Ray 2 (x1 < x0 = x2, classes 0 vs 2): Delta theta_2 = 0.000792 rad (0.0454 deg)
+- Ray 3 (x1 = x2 < x0, classes 1 vs 2): Delta theta_3 = 0.000568 rad (0.0325 deg)
+- Ray 4 (x2 < x1 = x0, classes 1 vs 0): Delta theta_4 = 0.000106 rad (0.0061 deg)
+- Ray 5 (x2 = x0 < x1, classes 2 vs 0): Delta theta_5 = 0.000336 rad (0.0193 deg)
+- Ray 6 (x0 < x2 = x1, classes 2 vs 1): Delta theta_6 = 0.000641 rad (0.0367 deg)
+
+In the equatorial plane (z = 0), the sum of these angular error wedges is sum_k Delta theta_k = 0.002501 rad. By the rotational symmetry of the 2D Gaussian, the measure of these wedges is (sum_k Delta theta_k) / (2*pi) = 0.00039803 (0.0398% error rate, or 99.9602% accuracy).
+
+Integrating along the orthogonal diagonal coordinate z = u . x ~ N(0, 1), the slight shift in ReLU boundary activations at non-zero z introduces an average tilt of Delta theta(z), with integrated error probability:
+P(error) = integral_{-inf}^{inf} P(error | z) * phi(z) dz = 0.00066333 (0.0663%).
+
+Accuracy estimate:
+Accuracy = 1 - P(error) = 1 - 0.00066333 = 0.999337 (99.9337%).
+
+Error regions included:
+- All 6 primary boundary wedges between adjacent permutation sectors (corresponding to pairwise confusions x0 ~ x1, x0 ~ x2, and x1 ~ x2).
+- The full Gaussian integration across the diagonal coordinate z ~ N(0, 1).
+
+Error regions left out:
+- Triple-coincidence boundaries where all three coordinates are simultaneously within 1e-4 of each other (measure < 1e-8).

@@ -1,0 +1,33 @@
+0.410122
+
+Method:
+The accuracy is derived analytically and via 1D spherical integration from the geometric error and success regions of the mechanistic model.
+
+1. Dominated Output:
+Row 2 of w_out is strictly dominated by rows 0 and 1 for all non-negative hidden states h >= 0. Hence, the network never predicts position 2 (P(Pred = 2) = 0).
+
+2. General Accuracy Identity:
+Because the true median M is uniform over {0, 1, 2} with P(M=0) = P(M=1) = P(M=2) = 1/3, and Pred is restricted to {0, 1}:
+Accuracy = P(M = Pred) = P(M=0, Pred=0) + P(M=1, Pred=1) + P(M=2, Pred=2)
+Since P(M=2, Pred=2) = 0 and P(M=0, Pred=0) = 1/3 - P(M=0, Pred=1), this simplifies exactly to:
+Accuracy = 1/3 + P(M=1, Pred=1) - P(M=0, Pred=1).
+
+3. Evaluation of Pred = 1 Regions:
+Pred = 1 occurs exclusively in two conical regions:
+- Region 1 (x1 <= 0, x2 > 0, x3 > c * x2):
+  Here c = -(w_hh @ w_ih)[1] / w_ih[1] ≈ 0.8702. Within this region, M=0 has probability 0. M=1 occurs iff x3 > x2, which has exact Gaussian probability P(x1 <= 0, 0 < x2 < x3) = (1/2) * (1/8) = 1/16 = 0.0625 in closed form.
+- Region 2 (x1 > 0, x2 > c * x1, k1 * d < x3 < k2 * d, where d = x2 - c * x1):
+  Here k1 = -w_hh[1, 1] ≈ 1.9861 and k2 ≈ 20.0271. Because all boundaries are homogeneous cones, 3D standard Gaussian measure reduces by spherical symmetry to a 1D integral over the azimuthal angle theta in [arctan(c), pi/2] with kernel delta(u / sqrt(1 + u^2)) / (4*pi):
+  - P(M=1, Region 2) ≈ 0.017259
+  - P(M=0, Region 2) ≈ 0.002970
+
+4. Sum:
+Accuracy = 1/3 + 0.0625 + 0.017259 - 0.002970 = 0.410122.
+
+5. Error Regions Included and Left Out:
+- Included:
+  - 100% of cases where the true median is 2 (probability 1/3): since Pred is never 2, the model fails on all such inputs.
+  - Missed median 1 predictions (P(M=1, Pred=0) ≈ 0.2536), including the entire half-plane x1 <= 0, x2 <= 0 where memory is erased (h2 = 0) and when x3 does not surpass activation thresholds.
+  - False positive median 1 predictions when true median is 0 (P(M=0, Pred=1) ≈ 0.00297).
+- Left out:
+  - Extreme-tail regions where x2 > 79.17 * x1 or x3 > 79.17 * x2, where unit 0 unexpectedly activates despite strong recurrent inhibition. The Gaussian measure of these regions is < 0.0002 (< 0.02%) and has a negligible impact.
