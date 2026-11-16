@@ -4,6 +4,8 @@
 #
 #   agents/round2.sh prepare   # create the 24 run directories
 #   agents/round2.sh launch    # 6 batches of 4 agents (one of each), ~3 h
+#   agents/round2.sh prepare antigravity && agents/round2.sh launch_serial antigravity
+#                              # redo one agent alone, one run at a time (agy hit its quota on 2026-11-10)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -11,8 +13,9 @@ agents=(claude codex antigravity grok)
 models=(argmedian_2_3 argmedian_8_3)
 
 prepare() {
+  local only=("${@:-${agents[@]}}")
   for m in "${models[@]}"; do
-    for a in "${agents[@]}"; do
+    for a in "${only[@]}"; do
       for n in 1 2 3; do
         .venv/bin/python -m agents.make_run --agent "$a" --model "$m" --n "$n" --root ~/agent-runs \
           --budget "30 minutes of wall-clock time, hard stop. Write your deliverables early and update them; whatever is in the directory at the stop is scored." \
@@ -33,6 +36,17 @@ launch() {
         agents/launch.sh "$a" "$a-$m-$n" 30 &
       done
       wait
+    done
+  done
+  echo "done $(date +%H:%M:%S)"
+}
+
+launch_serial() {
+  local a=$1
+  for m in "${models[@]}"; do
+    for n in 1 2 3; do
+      echo "run $a-$m-$n $(date +%H:%M:%S)"
+      agents/launch.sh "$a" "$a-$m-$n" 30
     done
   done
   echo "done $(date +%H:%M:%S)"
