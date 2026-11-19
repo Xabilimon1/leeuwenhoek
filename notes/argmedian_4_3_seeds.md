@@ -70,3 +70,18 @@ Scripts: `scripts/seeds_h4.py` (todas las cifras; exactas por enumeración de ca
 - Sin gemelo para ninguna semilla: no hay «vuelta». Las descripciones de 1-4 son descriptivas, no explicaciones cerradas.
 - Checkpoints parciales sin mirar (pendiente: ¿la semilla 0 pasa por una fase sin espejo antes de encontrarlo?).
 - Cinco semillas es una muestra pequeña: «1 de 5 encuentra el espejo» no es una tasa.
+
+## Entrenar aquí (2026-11-19)
+Scripts: `scripts/time_training_h4.py` (cronómetro) y `scripts/train_seed_h4.py` (entrenamiento completo con la receta de AlgZoo y comparación con ARC). Puntos del entrenamiento en `data/trained/argmedian_4_3_seed0/` (fuera de git).
+- **Una semilla completa (2³⁰ secuencias) tarda 316 s** en el MacBook Air M3 (CPU, 1 hilo; 0,28-0,29 ms por paso, igual con 1 que con 4 hilos). 50 semillas ≈ 4,4 h en serie.
+- **La semilla 0 entrenada aquí parte de la misma inicialización exacta que la de ARC** (punto 0 idéntico bit a bit) y **acaba con el mismo mecanismo**: w_ih [3,96, 4,70, −4,71, −3,96] frente a [3,97, 4,70, −4,72, −3,97]; residuo espejo 0,003 (ARC 0,004); acierto exacto 98,600 % (ARC 98,455 %); diferencia máxima de pesos 0,029. No es bit a bit: algo del entrenamiento difiere, seguramente los datos o la aritmética de su GPU [sin verificar].
+- Lectura: misma inicialización → mismo mecanismo aunque cambie el resto. Primera pista directa de que **el punto de partida decide el algoritmo** (con los signos de w_ih fijos desde 2²² secuencias en los 5 entrenamientos de ARC, según el contraste de Fable).
+
+## Literatura (búsqueda de Fable, 2026-11-19; informe completo en x-brain `Projects/Leeuwenhoek/Literatura-semillas.md`)
+- Universalidad parcial, conocida: Chughtai et al. 2023 (arXiv 2302.03025), Zhong et al. 2023 «The Clock and the Pizza» (2306.17844), Li et al. 2016 «Convergent Learning» (1511.07543), Gurnee et al. 2024 (2401.12181).
+- Estrategia por semilla y su relación con el resultado: Juneja et al. 2023 (2205.12411, BERT; lo más cercano), Lubana et al. 2023 (2211.08422), Gross et al. 2024 (2406.11779).
+- El inicio decide: Frankle et al. 2020 (1912.05671, 2002.10365), Zhou et al. 2019 (1905.01067, los signos).
+- Explicar errores: Zhang et al. 2026 (2609.35686), Geng et al. 2026 (2610.02098). Usar *dónde* falla para separar mecanismos limpios: no encontrado.
+- AlgZoo: el README dice «best of 5 random seeds»; Snider (LessWrong, oct. 2026) reentrenó ~8.000 redes de 2nd argmax. Nadie ha estudiado argmedian ni las semillas no publicadas.
+- ⚠️ Comentario de «phoenix» (5-8-2026, bajo «Returning to ARC» de Christiano, LessWrong), escrito por IA, repo privado «ATLAS»: afirma «M₄,₃: from-weights accuracy 0.9845503814», que es nuestro acierto exacto de argmedian h=4 con 10 cifras, y que una ley de empates «transfers to argmedian». No verificable; hay que citarlo si publicamos.
+- Veredicto: las piezas son conocidas; la combinación en un benchmark real de interpretabilidad (solo la semilla publicada tiene el mecanismo limpio, lo limpio va con el acierto, dónde falla los separa, el inicio decide) parece nueva. Un revisor pedirá: 50-100 semillas, una puntuación numérica de mecanismo, validar el predictor de errores en semillas no vistas, puntos tempranos que predigan el mecanismo final y conectividad entre semillas.
