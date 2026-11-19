@@ -94,6 +94,9 @@ Sugeridas por Jacob Hilton. Ambas usan la estimación que se recalcula desde los
   - **La fragilidad está en W_hh**: con ruido del 0,3 % solo en una matriz, el acierto cae 1,09 puntos (W_hh, 16 pesos), 0,23 (salida, 12) y 0,17 (entrada, 4). Descarta la hipótesis previa de los pesos de salida y enlaza con «por qué la red necesita W_hh con dos decimales».
   - **No está exactamente en un óptimo**: con ε = 0,01 % el acierto sube en 13 de 20 redes; con 0,03 %, en 8 de 20; con 0,1 %, en 6 de 20; con 0,3 %, baja en 20 de 20 (y en 40 de 40 en otra tanda). La caída crece más rápido que ε (0,18 → 1,24 puntos al triplicar ε, cerca de cuadrática).
 
+## Las otras semillas
+- Las semillas 1-4 (89,3 / 75,9 / 90,4 / 94,5 %) no tienen el espejo ni las parejas sube/baja, y el diseño de 2 números no describe ninguno de sus fallos; comparten solo la comparación «x2 > x1» del paso 2 y el estado muerto que responde x1. Detalle: `notes/argmedian_4_3_seeds.md` (`scripts/seeds_h4.py`).
+
 ## Lo que queda sin explicar
 - Errores restantes (0,26 %): piezas pequeñas de los caminos mezclados de los pasos 2 y 3.
 - Por qué la banda tiene esa pendiente: conectarla con la fuga de x₁ en el canal s.
