@@ -235,7 +235,7 @@ donde **a** es el tamaño de la comparación (8,67), **b** el de la memoria (0,7
 - **Por qué √3/(2π):** sale de la probabilidad gaussiana de caer en esa franja estrecha.
 - **La hipótesis que falló:** primero pensé que los errores estarían donde los tres números son casi iguales. Los datos lo descartaron.
 - **Comprobación:** contra el cálculo exacto cuadra hasta la cuarta cifra para cualquier e.
-- **Consecuencia:** con una memoria más pequeña, **la misma red de 32 parámetros acertaría el 99,999 %**. El entrenamiento se quedó con una memoria unas 10 veces mayor de lo necesario (todavía no sabemos por qué).
+- **Consecuencia:** con una memoria más pequeña, **la misma red de 32 parámetros acertaría el 99,999 %**. El entrenamiento se quedó con una memoria mucho mayor de lo necesario (todavía no sabemos por qué).
 *Scripts: `scripts/law_geometry.py`, `scripts/law_pieces.py`.*
 
 ### Paso 11. Los 0,064 puntos que faltaban
