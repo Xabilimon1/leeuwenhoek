@@ -114,3 +114,27 @@ Escrito y commiteado mientras entrenaban, sin haber mirado ningún resultado de 
 - Tasa = semillas con mecanismo / 20, con intervalo exacto al 95 % (Clopper-Pearson). Con 20 semillas el intervalo es ancho: 0 de 20 da 0-17 %; 1 de 20, 0,1-25 %.
 - Se informan también los valores continuos (residuo, % en casi empate, acierto exacto) y las semillas que pasan solo una de las dos pruebas, para no esconder casos frontera.
 - Script: `scripts/pilot_seeds_h4.py`.
+
+## Piloto de 20 semillas: resultado (2026-11-19/20)
+
+`PYTHONPATH=src python scripts/pilot_seeds_h4.py`. 20 de 20 entrenadas sin errores, 307-323 s cada una. Revisado por un agente Fable (código correcto, criterios aplicados sin cambios; sus correcciones a la interpretación están incorporadas abajo y en el script).
+
+**Lo registrado de antemano:**
+
+- **Mecanismo en 2 de 20 semillas (7 y 9): 10 %, intervalo exacto al 95 % 1-32 %.** Ninguna semilla pasa solo una de las dos pruebas: o las dos (residuo 0,005 y 0,014; 97 % de fallos en casi empate) o ninguna (residuo ≥ 1,03; ≤ 55 %).
+- **El predictor temprano falla: 0 de 2.** Residuo con 2²¹: 0,640 (semilla 7) y 1,341 (semilla 9), los dos por encima de 0,5. Lo que falló es el momento, no la dirección (post hoc): la 7 baja 0,88 → 0,64 → 0,296 (2²²) → 0,005; la 9 sube primero (1,15 → 1,34) y baja después, 0,405 en 2²⁴ y 0,014 al final. Probar otro punto exigiría semillas nuevas: elegirlo ahora con estos datos sería ajustar el umbral al resultado.
+
+**Post hoc (mirado después de ver la tabla; no registrado):**
+
+- **Las semillas 7 y 9 son funcionalmente el mecanismo de la semilla 0.** Coinciden con la semilla 0 de ARC en el 99,71 % y el 99,63 % de las entradas; donde la de ARC falla, dan la misma respuesta errónea el 87,9 % y el 85,3 %. Referencia: la semilla 0 reentrenada aquí (misma inicialización) da 99,70 % y 85,5 %. Es decir, están tan cerca de la de ARC como su propia reentrenada. El diseño de 2 números coincide con ellas +0,71 puntos por encima de su acierto (ARC 0: +0,67), lo que significa que acierta parte de sus fallos, no todos (Fable: reproduce un 49-53 % de los fallos de las tres). [muestreado, 1 M entradas]
+- **Acierto y mecanismo van juntos en estos datos:** las 3 redes con mecanismo (ARC 0, 7, 9) dan 98,46-98,54 %; la mejor sin él, 96,45 % (semilla 11). Con 3 frente a 22 es una observación, no un resultado.
+- **El entrenamiento repite soluciones.** Huella = error exacto por orden verdadero (6 números; no cambia al reordenar o reescalar neuronas), comparada también con la red de signo cambiado (la red con w_ih negado calcula f(−x), igual de válida e igual de probable). Grupos con huella a menos de 0,2 puntos, confirmados por coincidencia directa de respuestas (la mejor de x y −x):
+  - 13, 14, 16, 22: 99,87-99,90 %. Fallan un orden entero (x1 < x3 < x2, o su espejo x2 < x3 < x1: 16,67 % de las entradas).
+  - 7, 9 y ARC 0: 99,71-99,82 %.
+  - 5 y 6: 99,75 %. 12 y 18: 99,35 % (una es el espejo de la otra). 10 y ARC 1: 99,33 % (ídem).
+  - Las otras 12 de 25 no tienen pareja (la huella más cercana, a 0,53-11,5 puntos). Con 25 redes no se puede decir que haya un conjunto pequeño de soluciones; sí que algunas se repiten casi exactas.
+- **Las semillas 5, 6 y 20 (52-57 %) son las peores** (el azar es 33 %): responden x1 el 70-79 % de las veces; el 37-47 % de sus fallos son estado muerto. En la 5 y la 6 los cuatro pesos de entrada son positivos, así que con las tres entradas negativas el estado se apaga entero; pero eso solo explica el 12,5 % de las entradas.
+
+**Qué dirá un revisor:** n = 20 no distingue «raro» (1 %) de «uno de cada tres»; los umbrales 0,1 / 80 % / 0,05 se calibraron con las 5 semillas conocidas; el entrenamiento local (CPU) no es bit a bit el de ARC (GPU), aunque la semilla 0 reentrenada reproduce el mecanismo; residuo espejo + dónde falla no prueban por sí solos la estructura de comparadores (lo hace la coincidencia funcional con la semilla 0).
+
+**Respuesta a Javier:** el mecanismo aparece, pero no siempre: en 2 de 20 entrenamientos desde cero (10 %, 1-32 %), y cuando aparece es el mismo, casi respuesta por respuesta. El resto cae en otras soluciones, algunas repetidas. Siguiente paso natural: más semillas para estrechar la tasa (100 semillas ≈ 9 h de Mac, o en otra máquina) y, para el predictor temprano, fijar un punto nuevo (por ejemplo 2²² o 2²⁴) y probarlo en semillas que aún no hayamos mirado.
