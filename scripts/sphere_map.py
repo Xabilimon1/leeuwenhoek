@@ -1,8 +1,8 @@
 """Equal-area map of argmedian h=4 L=3 predictions over input directions.
 
-Usage: uv run python scripts/sphere_map.py [--hidden 4] [--out figures/...png]
+Usage: uv run python scripts/sphere_map.py [--hidden 4] [--seed 0..4] [--out figures/...png]
 Every pixel has equal probability under Gaussian inputs, so the black area
-is exactly the error rate.
+is exactly the error rate. Without --seed it maps the shipped (best) network.
 """
 
 import argparse
@@ -23,14 +23,16 @@ from leeuwenhoek.sphere import directions, grid
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--hidden", type=int, default=4)
+parser.add_argument("--seed", type=int, default=None, help="training seed 0-4; default: the shipped best")
 parser.add_argument("--out", default=None)
 args = parser.parse_args()
-out = Path(args.out or f"figures/sphere_argmedian_{args.hidden}_3.png")
+tag = "" if args.seed is None else f"_seed{args.seed}"
+out = Path(args.out or f"figures/sphere_argmedian_{args.hidden}_3{tag}.png")
 
 N_THETA, N_Z = 1440, 720
 theta, z = grid(N_THETA, N_Z)
 u = directions(theta, z)
-_, w = load_argmedian(args.hidden, 3)
+_, w = load_argmedian(args.hidden, 3, seed=args.seed)
 pred = forward(w, u.reshape(-1, 3)).argmax(-1).reshape(N_Z, N_THETA)
 true = argmedian_target(u)
 wrong = pred != true
@@ -64,7 +66,8 @@ for k in range(6):
     ax.text(60 * k, 1.03, f"x{order[0]+1}<x{order[1]+1}<x{order[2]+1}", ha="center", fontsize=9)
 ax.set_xlabel("theta (deg): angle around (1,1,1) — fixes the ordering")
 ax.set_ylabel("z: component along (1,1,1)/sqrt(3)")
-ax.set_title(f"argmedian h={args.hidden} L=3 — model prediction (colour) and errors (black, {wrong.mean():.2%} of area)", pad=22)
+label = f"argmedian h={args.hidden} L=3" + ("" if args.seed is None else f" seed {args.seed}")
+ax.set_title(f"{label} — model prediction (colour) and errors (black, {wrong.mean():.2%} of area)", pad=22)
 ax.legend(handles=[Patch(color=c, alpha=0.7, label=f"predicts x{i+1}") for i, c in enumerate(colors)]
           + [Patch(color="#111111", label="wrong")], loc="lower right", fontsize=8, framealpha=0.9)
 out.parent.mkdir(parents=True, exist_ok=True)
