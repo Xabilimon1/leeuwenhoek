@@ -102,3 +102,15 @@ Script: `scripts/checkpoints_h4.py` (acierto exacto, signos de w_ih y residuo es
 - **El residuo espejo sí separa pronto**: la 0 baja sin parar (0,545 → 0,155 en 2^21 → 0,004); las otras cuatro se quedan por encima de 0,92 desde 2^20 hasta el final. A 2^21 secuencias (el 0,2 % del entrenamiento) la 0 ya es distinta.
 - El acierto, en cambio, no ordena bien pronto: la 4 está por debajo de la 1 y la 3 en 2^22 y acaba por encima.
 - Lectura honesta: con 5 semillas es una pista. Si se mantiene con 20-100, el residuo espejo temprano sería un predictor del mecanismo final (lo que un revisor pediría, punto 4).
+
+## Piloto de 20 semillas: criterios fijados antes de ver los datos (2026-11-19)
+
+Pregunta de Javier: ¿aparece el mecanismo de la semilla 0 al entrenar desde cero? Semillas 5-24 entrenadas aquí con la receta de AlgZoo (`scripts/train_seed_h4.py --train-only`, 1 hilo, 2 procesos a la vez). Las 0-4 de ARC van aparte: la 0 es la mejor de 5 (elegida), no una semilla al azar.
+
+Escrito y commiteado mientras entrenaban, sin haber mirado ningún resultado de las semillas 5-24:
+
+- **Mecanismo presente** si y solo si residuo espejo final < 0,1 **y** ≥ 80 % de los fallos en casi empate (hueco relativo < 0,05). Referencia: semilla 0, 0,004 y 96 %; semillas 1-4, 1,03-1,41 y 13-47 %.
+- **Predictor temprano**: residuo espejo con 2²¹ secuencias (0,2 % del entrenamiento) < 0,5. Semilla 0: 0,155; semillas 1-4: ≥ 1,13 en ese punto.
+- Tasa = semillas con mecanismo / 20, con intervalo exacto al 95 % (Clopper-Pearson). Con 20 semillas el intervalo es ancho: 0 de 20 da 0-17 %; 1 de 20, 0,1-25 %.
+- Se informan también los valores continuos (residuo, % en casi empate, acierto exacto) y las semillas que pasan solo una de las dos pruebas, para no esconder casos frontera.
+- Script: `scripts/pilot_seeds_h4.py`.

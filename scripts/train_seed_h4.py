@@ -14,7 +14,7 @@ Result on 2026-11-19 (MacBook Air M3, CPU, 1 thread), seed 0:
 
 Checkpoints go to data/trained/argmedian_4_3_seed<s>/ (gitignored).
 
-Usage: uv run python scripts/train_seed_h4.py --seed 0 [--compare-only]
+Usage: uv run python scripts/train_seed_h4.py --seed 0 [--compare-only | --train-only]
 """
 
 import argparse
@@ -33,6 +33,7 @@ from leeuwenhoek.structure import mirror_permutation
 parser = argparse.ArgumentParser()
 parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--compare-only", action="store_true")
+parser.add_argument("--train-only", action="store_true", help="skip the comparison (ARC only ships seeds 0-4)")
 args = parser.parse_args()
 
 out = Path(__file__).resolve().parents[1] / "data" / "trained" / f"argmedian_4_3_seed{args.seed}"
@@ -45,6 +46,8 @@ if not args.compare_only:
     t = time.time()
     train("argmedian", hidden_size=4, seq_len=3, seed=args.seed, log_every=2**16)
     print(f"training time: {time.time() - t:.0f} s")
+    if args.train_only:
+        raise SystemExit
 
 
 def load(path):
