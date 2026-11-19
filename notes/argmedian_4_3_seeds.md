@@ -85,3 +85,20 @@ Scripts: `scripts/time_training_h4.py` (cronómetro) y `scripts/train_seed_h4.py
 - AlgZoo: el README dice «best of 5 random seeds»; Snider (LessWrong, oct. 2026) reentrenó ~8.000 redes de 2nd argmax. Nadie ha estudiado argmedian ni las semillas no publicadas.
 - ⚠️ Comentario de «phoenix» (5-8-2026, bajo «Returning to ARC» de Christiano, LessWrong), escrito por IA, repo privado «ATLAS»: afirma «M₄,₃: from-weights accuracy 0.9845503814», que es nuestro acierto exacto de argmedian h=4 con 10 cifras, y que una ley de empates «transfers to argmedian». No verificable; hay que citarlo si publicamos.
 - Veredicto: las piezas son conocidas; la combinación en un benchmark real de interpretabilidad (solo la semilla publicada tiene el mecanismo limpio, lo limpio va con el acierto, dónde falla los separa, el inicio decide) parece nueva. Un revisor pedirá: 50-100 semillas, una puntuación numérica de mecanismo, validar el predictor de errores en semillas no vistas, puntos tempranos que predigan el mecanismo final y conectividad entre semillas.
+
+## A lo largo del entrenamiento de ARC (2026-11-19)
+Script: `scripts/checkpoints_h4.py` (acierto exacto, signos de w_ih y residuo espejo en cada punto publicado, 2^20 … 2^30).
+
+| Semilla | 2^20 | 2^21 | 2^22 | 2^24 | 2^26 | 2^28 | 2^30 |
+|---|---|---|---|---|---|---|---|
+| 0: acierto / espejo | 80,46 % / 0,545 | 92,17 % / 0,155 | 95,46 % / 0,075 | 96,81 % / 0,037 | 97,67 % / 0,015 | 98,27 % / 0,005 | 98,455 % / 0,004 |
+| 1 | 68,22 / 1,259 | 81,54 / 1,253 | 84,45 / 1,285 | 84,50 / 1,081 | 86,39 / 1,029 | 88,99 / 1,060 | 89,28 / 1,028 |
+| 2 | 62,49 / 0,925 | 73,92 / 1,215 | 74,67 / 1,168 | 75,74 / 1,259 | 76,02 / 1,281 | 75,81 / 1,301 | 75,90 / 1,312 |
+| 3 | 57,04 / 1,715 | 85,66 / 1,163 | 89,34 / 1,119 | 90,13 / 1,360 | 89,50 / 1,369 | 90,22 / 1,395 | 90,44 / 1,406 |
+| 4 | 58,11 / 1,385 | 76,74 / 1,130 | 78,47 / 1,032 | 92,38 / 0,978 | 89,75 / 1,130 | 93,93 / 1,234 | 94,52 / 1,265 |
+
+- **Signos de w_ih fijos desde 2^22 en las 5** (la 3 cambia en 2^21, la 4 en 2^22). Confirma, ya con script, lo que vio Fable.
+- **Pero los signos no deciden el mecanismo**: la semilla 4 acaba con el mismo patrón que la 0 (`++--`) y nunca tiene espejo (residuo ≥ 0,98 en todos los puntos).
+- **El residuo espejo sí separa pronto**: la 0 baja sin parar (0,545 → 0,155 en 2^21 → 0,004); las otras cuatro se quedan por encima de 0,92 desde 2^20 hasta el final. A 2^21 secuencias (el 0,2 % del entrenamiento) la 0 ya es distinta.
+- El acierto, en cambio, no ordena bien pronto: la 4 está por debajo de la 1 y la 3 en 2^22 y acaba por encima.
+- Lectura honesta: con 5 semillas es una pista. Si se mantiene con 20-100, el residuo espejo temprano sería un predictor del mecanismo final (lo que un revisor pediría, punto 4).
