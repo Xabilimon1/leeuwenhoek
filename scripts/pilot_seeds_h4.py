@@ -15,6 +15,8 @@ Criteria fixed on 2026-11-19 before looking at any of seeds 5-24
 The rate is reported with an exact (Clopper-Pearson) 95 % interval.
 
 Usage: PYTHONPATH=src python scripts/pilot_seeds_h4.py [--seeds 5 ... 24] [--n 1000000]
+100 seeds (criteria fixed 2026-11-20, same note):
+  PYTHONPATH=src python scripts/pilot_seeds_h4.py --seeds $(seq 25 124) --early 24:0.7 22:0.9
 """
 
 import argparse
@@ -31,13 +33,16 @@ from leeuwenhoek.metrics import argmedian_target, gaussian_inputs
 from leeuwenhoek.models import load_argmedian, numpy_weights
 from leeuwenhoek.structure import mirror_permutation
 
-MIRROR_MAX, NEAR_TIE_MIN, GAP, EARLY_N, EARLY_MAX = 0.1, 0.8, 0.05, 2**21, 0.5
+MIRROR_MAX, NEAR_TIE_MIN, GAP = 0.1, 0.8, 0.05
 ROOT = Path(__file__).resolve().parents[1] / "data" / "trained"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--seeds", type=int, nargs="+", default=list(range(5, 25)))
 parser.add_argument("--n", type=int, default=1_000_000)
+parser.add_argument("--early", nargs="+", default=["21:0.5"],
+                    help="early predictors k:threshold = mirror residual at 2^k below threshold; the first is the main one")
 args = parser.parse_args()
+EARLY = [(int(k), float(t)) for k, t in (e.split(":") for e in args.early)]
 
 x = gaussian_inputs(args.n, 3, seed=1)
 target = argmedian_target(x)
@@ -77,18 +82,18 @@ def measure(seed, get):
     wrong = forward(w, x).argmax(-1) != target
     near = float(np.mean(gap[wrong] < GAP)) if wrong.any() else float("nan")
     res = mirror_permutation(w)[1]
-    early = mirror_permutation(get(seed, EARLY_N))[1]
+    early = [mirror_permutation(get(seed, 2**k))[1] for k, _ in EARLY]
     signs = "".join("+" if v > 0 else "-" for v in w["w_ih"])
     mech = res < MIRROR_MAX and near >= NEAR_TIE_MIN
-    return dict(seed=seed, acc=acc, near=near, res=res, early=early, signs=signs, mech=mech, pred=early < EARLY_MAX)
+    return dict(seed=seed, acc=acc, near=near, res=res, early=early, signs=signs, mech=mech, pred=[e < t for e, (_, t) in zip(early, EARLY)])
 
 
 def table(rows, title):
     print(f"\n{title}")
-    print(f"{'seed':>4} {'exact acc':>10} {'near-tie*':>10} {'mirror':>7} {'mirror@2^21':>12} {'w_ih':>5}  mechanism  predicted")
+    print(f"{'seed':>4} {'exact acc':>10} {'near-tie*':>10} {'mirror':>7} {'mirror@2^' + str(EARLY[0][0]):>12} {'w_ih':>5}  mechanism  predicted")
     for r in rows:
-        print(f"{r['seed']:>4} {r['acc']:>10.3%} {r['near']:>10.0%} {r['res']:>7.3f} {r['early']:>12.3f} {r['signs']:>5}  "
-              f"{'YES' if r['mech'] else 'no':>9}  {'YES' if r['pred'] else 'no':>9}")
+        print(f"{r['seed']:>4} {r['acc']:>10.3%} {r['near']:>10.0%} {r['res']:>7.3f} {r['early'][0]:>12.3f} {r['signs']:>5}  "
+              f"{'YES' if r['mech'] else 'no':>9}  {'YES' if r['pred'][0] else 'no':>9}")
     print(f"* sampled ({args.n} inputs): share of errors with relative gap < {GAP}; base rate {np.mean(gap < GAP):.1%} of inputs")
 
 
@@ -99,10 +104,12 @@ table(rows, f"trained here: seeds {args.seeds[0]}-{args.seeds[-1]}")
 n, k = len(rows), sum(r["mech"] for r in rows)
 lo, hi = clopper_pearson(k, n)
 print(f"\nmechanism found in {k} of {n} seeds = {k / n:.0%}  (95 % interval {lo:.0%}-{hi:.0%})")
-tp = sum(r["mech"] and r["pred"] for r in rows)
-fp = sum(r["pred"] and not r["mech"] for r in rows)
-fn = sum(r["mech"] and not r["pred"] for r in rows)
-print(f"early predictor (mirror@2^21 < {EARLY_MAX}): {tp} hits, {fp} false alarms, {fn} misses")
+for i, (kk, t) in enumerate(EARLY):
+    tp = sum(r["mech"] and r["pred"][i] for r in rows)
+    fp = sum(r["pred"][i] and not r["mech"] for r in rows)
+    fn = sum(r["mech"] and not r["pred"][i] for r in rows)
+    tag = "main" if i == 0 else "secondary"
+    print(f"early predictor, {tag} (mirror@2^{kk} < {t}): {tp} hits, {fp} false alarms, {fn} misses")
 borderline = [r["seed"] for r in rows if (r["res"] < MIRROR_MAX) != (r["near"] >= NEAR_TIE_MIN)]
 print(f"seeds passing only one of the two tests: {borderline or 'none'}")
 accs = np.array([r["acc"] for r in rows])
@@ -133,11 +140,11 @@ def dist(a, b):
 
 order = lambda s: (s.startswith("ARC"), int(s.split()[-1]))  # noqa: E731
 groups = []
-for name in prints:  # single linkage, 0.05 percentage points per ordering
-    hit = [g for g in groups if any(dist(name, m) < 5e-4 for m in g)]
+for name in prints:  # single linkage, 0.2 percentage points per ordering
+    hit = [g for g in groups if any(dist(name, m) < 2e-3 for m in g)]
     merged = [name] + [m for g in hit for m in g]
     groups = [g for g in groups if g not in hit] + [merged]
-print("nets with the same exact error fingerprint (error per ordering within 0.05 points, up to x -> -x):")
+print("nets with the same exact error fingerprint (error per ordering within 0.2 points, up to x -> -x):")
 for g in sorted(groups, key=len, reverse=True):
     if len(g) > 1:
         print(f"  {', '.join(sorted(g, key=order))}   error by ordering, up to x -> -x (% of inputs): {np.round(100 * prints[g[0]], 2)}")
@@ -155,9 +162,11 @@ def agree(wa, wb):
 
 
 W = dict(nets)
-print("functional agreement inside the near groups (same answer, best of x and -x) [sampled]:")
-for a, b in [("13", "14"), ("13", "16"), ("13", "22"), ("5", "6"), ("12", "18"), ("10", "ARC 1"), ("7", "9"), ("7", "ARC 0")]:
-    print(f"  {a:>5} vs {b:>5}: {agree(W[a], W[b]):.2%}")
+print("functional agreement inside the fingerprint groups (same answer, best of x and -x) [sampled]:")
+for g in sorted(groups, key=len, reverse=True):
+    g = sorted(g, key=order)
+    for b in g[1:]:
+        print(f"  {g[0]:>6} vs {b:>6}: {agree(W[g[0]], W[b]):.2%}")
 
 # 2) Do the mechanism seeds fail where seed 0 fails? Reference: ARC seed 0 against
 #    seed 0 retrained here (same initialization, same mechanism, not bit-identical).

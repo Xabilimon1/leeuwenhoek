@@ -138,3 +138,17 @@ Escrito y commiteado mientras entrenaban, sin haber mirado ningún resultado de 
 **Qué dirá un revisor:** n = 20 no distingue «raro» (1 %) de «uno de cada tres»; los umbrales 0,1 / 80 % / 0,05 se calibraron con las 5 semillas conocidas; el entrenamiento local (CPU) no es bit a bit el de ARC (GPU), aunque la semilla 0 reentrenada reproduce el mecanismo; residuo espejo + dónde falla no prueban por sí solos la estructura de comparadores (lo hace la coincidencia funcional con la semilla 0).
 
 **Respuesta a Javier:** el mecanismo aparece, pero no siempre: en 2 de 20 entrenamientos desde cero (10 %, 1-32 %), y cuando aparece es el mismo, casi respuesta por respuesta. El resto cae en otras soluciones, algunas repetidas. Siguiente paso natural: más semillas para estrechar la tasa (100 semillas ≈ 9 h de Mac, o en otra máquina) y, para el predictor temprano, fijar un punto nuevo (por ejemplo 2²² o 2²⁴) y probarlo en semillas que aún no hayamos mirado.
+
+## 100 semillas: criterios fijados antes de entrenar (2026-11-20)
+
+Semillas 25-124, que nadie ha mirado. Se entrenan por tandas con `scripts/train_batch_h4.py` (la misma receta del piloto: AlgZoo, 1 hilo; para por número de semillas o por horas, sigue donde lo dejó, vigila el calor). Las tandas, pausas y cortes no cambian nada de lo de abajo.
+
+Escrito y subido a GitHub antes de entrenar la primera:
+
+- **Mecanismo**: el mismo criterio del piloto, sin tocar (residuo espejo final < 0,1 y ≥ 80 % de fallos en casi empate). Tasa = k / 100 con intervalo exacto al 95 %; se da también la suma con el piloto (k + 2) / 120.
+- **Aviso temprano**, calibrado con las 25 redes ya conocidas (`scripts/calibrate_early_h4.py`) y **probado solo en las 100 nuevas**:
+  - principal: residuo espejo con 2²⁴ secuencias (1,6 % del entrenamiento) < 0,7. En las 25 conocidas: con mecanismo ≤ 0,405; sin él ≥ 0,978;
+  - secundario: con 2²² (0,4 %) < 0,9. En las conocidas: ≤ 0,822 frente a ≥ 1,003 (margen estrecho).
+  - Funciona si detecta todas las semillas con mecanismo y da como mucho 5 falsas alarmas.
+- **Soluciones repetidas**: dos redes son la misma solución si su huella (error exacto por orden, también contra la red de signo cambiado) difiere menos de 0,2 puntos **y** dan la misma respuesta en ≥ 99 % de las entradas (la mejor de x y −x). Se informa del número de soluciones distintas y del tamaño de los grupos mayores.
+- Comando: `PYTHONPATH=src python scripts/pilot_seeds_h4.py --seeds $(seq 25 124) --early 24:0.7 22:0.9`. Cualquier análisis que no esté aquí se marcará como post hoc.
