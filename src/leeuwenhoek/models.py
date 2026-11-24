@@ -32,3 +32,25 @@ def numpy_weights(model):
         "w_hh": sd["rnn.weight_hh_l0"].numpy().copy(),  # (h, h)
         "w_out": sd["linear.weight"].numpy().copy(),  # (L, h)
     }
+
+
+def mirror_init_(model, pairs=((0, 3), (1, 2))):
+    """Make a DistRNN exactly sign-mirror symmetric, in place, keeping the first half.
+
+    Neurons pairs[k] = (i, j): j becomes the mirror of i, so that with P the swap
+    P w_ih = -w_ih, P W_hh P^T = W_hh and W_out P^T = W_out (structure.mirror_permutation
+    gives residual 0). Only copies existing values: it draws no random numbers, so
+    the data stream of a training run is the same with or without it.
+    """
+    sd = model.state_dict()
+    wi, wh, wo = sd["rnn.weight_ih_l0"], sd["rnn.weight_hh_l0"], sd["linear.weight"]
+    perm = list(range(wi.shape[0]))
+    for i, j in pairs:
+        perm[i], perm[j] = j, i
+    with th.no_grad():
+        for i, _ in pairs:
+            wi[perm[i], 0] = -wi[i, 0]
+            for k in range(wi.shape[0]):
+                wh[perm[i], perm[k]] = wh[i, k]
+            wo[:, perm[i]] = wo[:, i]
+    return model

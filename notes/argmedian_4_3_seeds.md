@@ -152,3 +152,12 @@ Escrito y subido a GitHub antes de entrenar la primera:
   - Funciona si detecta todas las semillas con mecanismo y da como mucho 5 falsas alarmas.
 - **Soluciones repetidas**: dos redes son la misma solución si su huella (error exacto por orden, también contra la red de signo cambiado) difiere menos de 0,2 puntos **y** dan la misma respuesta en ≥ 99 % de las entradas (la mejor de x y −x). Se informa del número de soluciones distintas y del tamaño de los grupos mayores.
 - Comando: `PYTHONPATH=src python scripts/pilot_seeds_h4.py --seeds $(seq 25 124) --early 24:0.7 22:0.9`. Cualquier análisis que no esté aquí se marcará como post hoc.
+
+## Inicio en espejo, experimento emparejado: criterios fijados antes de entrenar (2026-11-24)
+
+Pista de un brainstorm (Fable, `scripts/explore_mirror_init/`, entrenamiento corto, post hoc): empezar con la red exactamente en espejo subía el mecanismo de 2/15 a 10/15. Esto la pone a prueba con la receta completa.
+
+- **Diseño**: semillas 25-48. Cada una se entrena dos veces con la receta completa de AlgZoo: inicio normal y el mismo inicio hecho espejo exacto (`models.mirror_init_`: conserva la primera mitad, no saca números aleatorios, así que los datos son idénticos en las dos ramas). Las 24 normales cuentan también para las 100 semillas (mismo archivo, misma receta). Lanzador: `scripts/train_batch_h4.py --first 25 --last 48 --arms normal mirror`.
+- **Mecanismo** (en las dos ramas): criterio del piloto (residuo espejo < 0,1 y ≥ 80 % de fallos en casi empate) **y** misma respuesta que la semilla 0 de ARC en ≥ 99 % de las entradas (la mejor de x y −x). En la rama espejo el residuo pequeño viene en parte de fábrica; la coincidencia es la que decide.
+- **La idea sigue solo si**: rama espejo ≥ 10/24 **y** McNemar exacto unilateral sobre las parejas p < 0,05. Si no, se abandona y lo de semillas queda en post. Se informa además de las redes espejo que pasan el criterio del piloto sin llegar al 99 % (¿otra solución simétrica?) y de las que se salen de la simetría.
+- Análisis: `PYTHONPATH=src python scripts/mirror_init_h4.py`. Lo que no esté aquí se marcará post hoc.

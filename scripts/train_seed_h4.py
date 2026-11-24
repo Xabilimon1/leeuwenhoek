@@ -14,7 +14,7 @@ Result on 2026-11-19 (MacBook Air M3, CPU, 1 thread), seed 0:
 
 Checkpoints go to data/trained/argmedian_4_3_seed<s>/ (gitignored).
 
-Usage: uv run python scripts/train_seed_h4.py --seed 0 [--compare-only | --train-only]
+Usage: uv run python scripts/train_seed_h4.py --seed 0 [--compare-only | --train-only] [--mirror-init]
 """
 
 import argparse
@@ -34,14 +34,31 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--compare-only", action="store_true")
 parser.add_argument("--train-only", action="store_true", help="skip the comparison (ARC only ships seeds 0-4)")
+parser.add_argument("--mirror-init", action="store_true",
+                    help="make the initial net sign-mirror symmetric (models.mirror_init_); same data stream")
 args = parser.parse_args()
 
-out = Path(__file__).resolve().parents[1] / "data" / "trained" / f"argmedian_4_3_seed{args.seed}"
+tag = "mirror_" if args.mirror_init else ""
+out = Path(__file__).resolve().parents[1] / "data" / "trained" / f"argmedian_4_3_{tag}seed{args.seed}"
 if not args.compare_only:
     out.mkdir(parents=True, exist_ok=True)
     os.environ["RESULTS_DIR"] = str(out)
     th.set_num_threads(1)
+    import alg_zoo.training as T
     from alg_zoo.training import train
+
+    if args.mirror_init:
+        from leeuwenhoek.models import mirror_init_
+
+        save_model, first = T.save_model, [True]
+
+        def mirror_then_save(model, name):  # the first save is the step-0 one, right after init, before any data
+            if first[0]:
+                first[0] = False
+                mirror_init_(model)
+            save_model(model, name)
+
+        T.save_model = mirror_then_save
 
     t = time.time()
     train("argmedian", hidden_size=4, seq_len=3, seed=args.seed, log_every=2**16)

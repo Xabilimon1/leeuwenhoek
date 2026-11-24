@@ -14,7 +14,7 @@ Built for a fanless MacBook Air that is only left training while nobody uses it:
 
 Every seed is logged to data/trained/batch_log.tsv.
 
-Usage: PYTHONPATH=src python scripts/train_batch_h4.py --first 25 --last 124 (--count 50 | --hours 1.5)
+Usage: PYTHONPATH=src python scripts/train_batch_h4.py --first 25 --last 124 (--count 50 | --hours 1.5) [--arms normal mirror]
 """
 
 import argparse
@@ -34,7 +34,9 @@ LOG = TRAINED / "batch_log.tsv"
 parser = argparse.ArgumentParser()
 parser.add_argument("--first", type=int, default=25)
 parser.add_argument("--last", type=int, default=124)
-parser.add_argument("--count", type=int, help="train at most this many seeds")
+parser.add_argument("--count", type=int, help="train at most this many runs")
+parser.add_argument("--arms", nargs="+", default=["normal"], choices=["normal", "mirror"],
+                    help="per seed, train these arms in this order (mirror = --mirror-init)")
 parser.add_argument("--hours", type=float, help="do not start a seed that would end after this many hours")
 parser.add_argument("--rest", type=int, default=60, help="pause between seeds (s)")
 parser.add_argument("--slow", type=int, default=400, help="a seed slower than this (s) triggers --cooldown")
@@ -44,8 +46,9 @@ if args.count is None and args.hours is None:
     sys.exit("give --count or --hours")
 
 
-def final(seed):
-    return TRAINED / f"argmedian_4_3_seed{seed}" / f"argmedian_4_3_{2**30}_{seed}.pth"
+def final(seed, arm="normal"):
+    tag = "mirror_" if arm == "mirror" else ""
+    return TRAINED / f"argmedian_4_3_{tag}seed{seed}" / f"argmedian_4_3_{2**30}_{seed}.pth"
 
 
 def thermal_warning():
@@ -70,11 +73,11 @@ TRAINED.mkdir(parents=True, exist_ok=True)
 (TRAINED / "seed_logs").mkdir(exist_ok=True)
 STOP.unlink(missing_ok=True)
 subprocess.Popen(["caffeinate", "-i", "-w", str(os.getpid())])
-todo = [s for s in range(args.first, args.last + 1) if not final(s).exists()]
-print(f"{len(todo)} seeds left in {args.first}-{args.last}", flush=True)
+todo = [(s, a) for s in range(args.first, args.last + 1) for a in args.arms if not final(s, a).exists()]
+print(f"{len(todo)} runs left in seeds {args.first}-{args.last}, arms {args.arms}", flush=True)
 start, done, expected = time.time(), 0, 330.0
 
-for seed in todo:
+for seed, arm in todo:
     if args.count is not None and done >= args.count:
         break
     if args.hours is not None and time.time() - start + expected > args.hours * 3600:
@@ -88,13 +91,13 @@ for seed in todo:
     if warn:
         log(datetime.now().isoformat(timespec="seconds"), seed, "", "thermal warning, stopping: " + " | ".join(warn))
         break
-    d = final(seed).parent
+    d = final(seed, arm).parent
     if d.exists():  # cut half-way last time
         shutil.rmtree(d)
     t = time.time()
-    with open(TRAINED / "seed_logs" / f"seed{seed}.log", "w") as out:
+    with open(TRAINED / "seed_logs" / f"{d.name}.log", "w") as out:
         p = subprocess.Popen(["nice", "-n", "10", sys.executable, str(REPO / "scripts" / "train_seed_h4.py"),
-                              "--seed", str(seed), "--train-only"], stdout=out, stderr=subprocess.STDOUT,
+                              "--seed", str(seed), "--train-only"] + (["--mirror-init"] if arm == "mirror" else []), stdout=out, stderr=subprocess.STDOUT,
                              env={**os.environ, "PYTHONPATH": str(REPO / "src")})
         try:
             code = p.wait()
@@ -105,17 +108,17 @@ for seed in todo:
             log(datetime.now().isoformat(timespec="seconds"), seed, "", "interrupted, partial seed deleted")
             sys.exit(1)
     secs = time.time() - t
-    if code != 0 or not final(seed).exists():
-        log(datetime.now().isoformat(timespec="seconds"), seed, f"{secs:.0f}", f"FAILED (exit {code}), see seed_logs/seed{seed}.log")
+    if code != 0 or not final(seed, arm).exists():
+        log(datetime.now().isoformat(timespec="seconds"), seed, f"{secs:.0f}", f"FAILED (exit {code}), see seed_logs/{d.name}.log")
         break
     done += 1
     expected = max(expected, secs + args.rest)
-    log(datetime.now().isoformat(timespec="seconds"), seed, f"{secs:.0f}", "done")
+    log(datetime.now().isoformat(timespec="seconds"), seed, f"{secs:.0f}", f"done ({arm})")
     if secs > args.slow:
         log(datetime.now().isoformat(timespec="seconds"), seed, "", f"slow seed (Mac hot?), cooling {args.cooldown} s")
         time.sleep(args.cooldown)
     else:
         time.sleep(args.rest)
 
-left = sum(not final(s).exists() for s in range(args.first, args.last + 1))
-print(f"batch over: {done} seeds trained in {(time.time() - start) / 3600:.2f} h; {left} left in {args.first}-{args.last}")
+left = sum(not final(s, a).exists() for s in range(args.first, args.last + 1) for a in args.arms)
+print(f"batch over: {done} runs trained in {(time.time() - start) / 3600:.2f} h; {left} left in {args.first}-{args.last}")
