@@ -1,0 +1,30 @@
+0.999513
+Method:
+We compute the Gaussian measure of the model's error regions analytically from the mechanistic explanation of its decision boundaries. Under i.i.d. standard Gaussian inputs x ~ N(0, I_3), the distribution is spherically symmetric, so the measure of any cone originating from 0 equals its solid angle divided by 4*pi.
+
+The network implements the median function by dividing space into 6 permutation sectors meeting along 6 two-dimensional interface half-planes radiating outward from the line x0 = x1 = x2:
+- B1: x1 ~ x2, with x0 < min(x1, x2) (competing logits 1 vs 2)
+- B2: x0 ~ x2, with max(x0, x2) < x1 (competing logits 2 vs 0)
+- B3: x0 ~ x1, with x2 < min(x0, x1) (competing logits 0 vs 1)
+- B4: x1 ~ x2, with max(x1, x2) < x0 (competing logits 1 vs 2)
+- B5: x0 ~ x2, with x1 < min(x0, x2) (competing logits 2 vs 0)
+- B6: x0 ~ x1, with max(x0, x1) < x2 (competing logits 0 vs 1)
+
+For each interface k in 1..6, the ideal boundary is a plane with normal vector n_ideal_k (e.g., (0, -1, 1) for B1). The network's effective decision boundary in the canonical activation pattern for that interface has normal vector n_model_k derived analytically from w_out @ H_3. The angular deviation between n_ideal_k and n_model_k is:
+- B1: 0.000682 rad
+- B2: 0.000460 rad
+- B3: 0.000196 rad
+- B4: 0.000631 rad
+- B5: 0.000796 rad
+- B6: 0.000297 rad
+
+Each tilted boundary plane carves out a thin dihedral error wedge along the corresponding half-plane interface. The Gaussian measure of a half-plane wedge with dihedral angle delta_theta is delta_theta / (2*pi). Summing the measure over all 6 boundaries gives a total error probability of:
+P(error) = sum_{k=1}^6 delta_theta_k / (2*pi) = 0.003062 / (2*pi) = 0.0004874
+
+Thus, the estimated model accuracy is 1 - 0.0004874 = 0.999513.
+
+Regions included:
+The 6 primary planar error wedges along each of the pairwise comparison boundaries (B1 through B6) under the canonical ReLU activation patterns that cover the vast majority of the probability mass.
+
+Regions left out:
+Higher-order boundary tilts occurring at extreme shift values along (1, 1, 1) where secondary ReLU units activate/deactivate, and small second-order boundary interactions in the immediate vicinity of the central line x0 = x1 = x2.

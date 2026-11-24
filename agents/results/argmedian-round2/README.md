@@ -4,7 +4,7 @@
 
 Cada carpeta guarda lo que entregó el agente (`twin.py`, `estimate.txt`, `EXPLANATION.md`), su puntuación (`score.json`, de `agents/score.py`, 10⁶ entradas, semilla 20261108) y sus tiempos. Las transcripciones se conservan en local.
 
-**Antigravity va aparte**: el 2026-11-10 se quedó sin cuota antes de empezar. Se repitió el 2026-11-16, una ejecución tras otra (`agents/round2.sh launch_serial antigravity`): 4 de 6 válidas. En h=8, la rep. 2 se cortó por cuota a los 11 min sin entregar nada y la rep. 3 falló al instante («Resets in 167h»); se repetirán hacia el 2026-11-23.
+**Antigravity va aparte**: el 2026-11-10 se quedó sin cuota antes de empezar. Se repitió el 2026-11-16, una ejecución tras otra (`agents/round2.sh launch_serial antigravity`): 4 de 6 válidas. En h=8, la rep. 2 se cortó por cuota a los 11 min sin entregar nada y la rep. 3 falló al instante («Resets in 167h»). Las dos se archivaron (`~/agent-runs/failed-quota-20261116/`) y se repitieron desde cero el 2026-11-24 con `make_run` y las mismas condiciones (mismos pesos y misma tarea), una tras otra: 12,5 y 13,5 min, sin cortes. Las 6 de Antigravity quedan completas.
 
 ## h=2
 
@@ -27,11 +27,12 @@ Cada carpeta guarda lo que entregó el agente (`twin.py`, `estimate.txt`, `EXPLA
 | Claude Code (Opus 5.5) | 99,980 / 99,962 / 99,973 | 0,0005 / 0,0015 / 0,0115 | 0,81 / 0,28 / 0,36 M | 2-3 min |
 | Codex CLI | 99,942 ×3 (regla de la mediana) | 0,0055 / 0,0030 / 0,0075 | **1,65 M** / 0,98 / 1,00 M | 4-6 min |
 | Grok Build | 99,942 ×3 (regla de la mediana) | 0,0000 / 0,0017 / 0,0145 | 0,55 / 0,38 / 0,63 M | 23-26 min |
-| Antigravity CLI | 99,952 / — / — | 0,0118 / — / — | 0,74 M / — / — | 13 min |
+| Antigravity CLI | 99,952 / 99,961 / 99,977 | 0,0118 / 0,0065 / 0,0058 | 0,74 / 0,55 / **1,02 M** | 12-14 min |
 
 - La mediana perfecta ya coincide con la red en el 99,942 %: la red solo falla en franjas finísimas junto a los empates. Gemelo fácil, estimación fácil de acercar.
 - **Casi ninguna estimación de h=8 sale limpia de la explicación** (ver avisos). Las que ganan al muestreo con el mismo cómputo (claude-1, claude-2, grok-1, grok-2) son justo las que ejecutaron la red o la recorrieron trozo a trozo.
-- **Las dos estimaciones limpias de h=8** (antigravity-8-1 y grok-8-3: inclinación de cada frontera sacada del mapa lineal de los pesos) pierden contra el muestreo: 0,0118 y 0,0145 puntos frente a 0,0027-0,0029 del muestreo con las mismas entradas.
+- **Las cuatro estimaciones limpias de h=8** (antigravity-8-1/2/3 y grok-8-3: inclinación de cada frontera sacada del mapa lineal de los pesos) pierden contra el muestreo: 0,0118 / 0,0065 / 0,0058 y 0,0145 puntos frente a 0,0023-0,0032 del muestreo con las mismas entradas.
+- **Antigravity es el único agente con las tres ejecuciones de h=8 limpias**: gemelos de 99,95-99,98 % (a la altura de los de Claude, que usan constantes medidas sobre el modelo) con constantes deducidas de los pesos, y estimaciones sin ejecutar la red. Pierde contra el muestreo, pero honestamente.
 
 ## Avisos para leer los resultados
 
@@ -39,8 +40,9 @@ Cada carpeta guarda lo que entregó el agente (`twin.py`, `estimate.txt`, `EXPLA
 - **Estimación que recorre la red trozo a trozo** (prohibido): grok-8-1 («every activation cone… inside each cone the logits are linear»).
 - **Anchos sin deducción**: codex-8-1/2/3 muestrean el acierto y los huecos de los errores y luego escriben un «ancho efectivo» (0,00027; 3,4·10⁻⁴; 0,00075) que no sale de ningún cálculo de la transcripción, aunque lo llaman «weight-derived».
 - **Constantes medidas, no deducidas**: los gemelos de claude-8-1/2/3 usan desplazamientos de frontera medidos sobre el modelo (claude-8-3 lo declara: «measured from the model's behaviour»).
-- antigravity-8-1 es la única estimación de h=8 deducida de los pesos de principio a fin: calcula el mapa lineal de la red en un punto de cada una de las 6 fronteras y suma las cuñas. Sus 3 constantes del gemelo son esos mismos ángulos (0,00064 ≈ 0,000641, etc.). Un intento de bisección sobre el modelo falló por un error de Python y no se usó.
+- antigravity-8-1 (y, el 2026-11-24, antigravity-8-2 y 8-3) son las estimaciones de h=8 deducidas de los pesos de principio a fin. En la 8-1: calcula el mapa lineal de la red en un punto de cada una de las 6 fronteras y suma las cuñas. Sus 3 constantes del gemelo son esos mismos ángulos (0,00064 ≈ 0,000641, etc.). Un intento de bisección sobre el modelo falló por un error de Python y no se usó.
 - grok-8-3 saca la inclinación de los pesos, pero abandona la deducción por tiempo y redondea (0,9996) sabiendo por el muestreo que el valor real es «closer to 0.9994».
-- **Tope de entradas superado**: grok-2-3 (2,12 M), codex-8-1 (1,65 M); codex-8-3 lo roza (1,00 M).
-- Revisión de las transcripciones: ningún acceso fuera de la carpeta, ninguna búsqueda web (`web_search_requests: 0`), ninguna instalación de paquetes, ningún bloqueo del sandbox. Lo mismo para Antigravity (sin `search_web` ni `read_url_content`; su memoria se archivó antes de cada ejecución). Los 22 gemelos se leyeron antes de ejecutarlos: numpy puro, sin pesos pegados (≤ 1 coincidencia casual de 12) y funcionan sin `weights.npz`.
+- antigravity-8-2 y 8-3 hacen lo mismo: buscan a mano el patrón de activación en un punto de cada frontera, calculan con los pesos la normal de la frontera de la red y su ángulo con la ideal, y suman las cuñas (8-2 sobre el plano, 8-3 con scipy). Ninguno de esos cálculos llama al modelo (comprobado en la transcripción: `load_weights` y álgebra lineal, sin entradas aleatorias). Las constantes de sus gemelos salen de esos mismos cálculos; 8-3 llega a prácticamente los mismos valores que 8-2 en tres fronteras (0,000930; 0,000431-0,000432; 0,000982).
+- **Tope de entradas superado**: grok-2-3 (2,12 M), codex-8-1 (1,65 M), antigravity-8-3 (1,02 M, en pruebas del gemelo y verificación; la estimación no usa el modelo); codex-8-3 lo roza (1,00 M).
+- Revisión de las transcripciones: ningún acceso fuera de la carpeta, ninguna búsqueda web (`web_search_requests: 0`), ninguna instalación de paquetes, ningún bloqueo del sandbox. Lo mismo para Antigravity (sin `search_web` ni `read_url_content`; su memoria se archivó antes de cada ejecución); en las dos repeticiones del 2026-11-24 solo usó `read_file`, `write_file` y `run_command`, siempre dentro de su carpeta. Los 24 gemelos se leyeron antes de ejecutarlos: numpy puro, sin pesos pegados (≤ 1 coincidencia casual de 12) y funcionan sin `weights.npz`.
 - Única edición sobre lo entregado: en `antigravity-argmedian_2_3-1/EXPLANATION.md` un enlace `file:///Users/…/weights.npz` con la ruta del disco se cambió por `weights.npz` (repo público).

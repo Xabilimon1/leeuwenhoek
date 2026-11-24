@@ -1,0 +1,25 @@
+0.99952
+The accuracy estimate is derived by integrating the Gaussian measure over the error regions described by the mechanistic explanation.
+
+Because the recurrent network has no bias terms, all internal activations and decision boundaries are scale-invariant cones through the origin in R^3. Furthermore, the network is approximately shift-invariant along (1, 1, 1) (i.e. all boundary normals n satisfy sum_i n_i ≈ 0).
+
+Under standard Gaussian inputs x ~ N(0, I_3), projecting onto the 2D subspace orthogonal to (1, 1, 1) yields an isotropic 2D Gaussian N(0, I_2). In this plane:
+1. The 6 permutations of inputs correspond to 6 equal 60-degree (pi/3 rad) sectors defined by pairwise equality lines x_i = x_j.
+2. The network's effective decision boundaries between argmax classes are hyperplanes tilted from the true median boundaries by small angles Delta_theta_k.
+3. Because the 2D Gaussian measure is rotationally symmetric, the measure of an angular error wedge of angle Delta_theta is exactly Delta_theta / (2 * pi).
+
+The angular tilt of the normal vector for each decision boundary was derived from the end-to-end linear maps M = w_out @ m_3 @ w_hh @ m_2 @ w_hh @ m_1 @ w_ih:
+- Sector (1, 0, 2) boundary x_0 = x_2: Delta_theta_102 = 0.000792 rad  (P_err = 0.000126)
+- Sector (0, 2, 1) boundary x_1 = x_2: Delta_theta_021 = 0.000641 rad  (P_err = 0.000102)
+- Sector (2, 1, 0) boundary x_1 = x_2: Delta_theta_210 = 0.000568 rad  (P_err = 0.000090)
+- Sector (2, 0, 1) boundary x_0 = x_2: Delta_theta_201 = 0.000336 rad  (P_err = 0.000053)
+- Sector (0, 1, 2) boundary x_0 = x_1: Delta_theta_01_max = 0.000567 rad (P_err = 0.000090)
+- Sector (2, 0, 1) boundary x_0 = x_1: Delta_theta_01_min = 0.000106 rad (P_err = 0.000017)
+
+Total error probability:
+P_error = sum(Delta_theta_k) / (2 * pi) = 0.003010 / (2 * pi) ≈ 0.000479.
+
+Accuracy = 1 - P_error ≈ 0.99952 (or 99.952%).
+
+Included error regions: All 6 primary boundary tilt wedges along the pairwise decision interfaces separating adjacent orderings.
+Left out: Second-order facet boundaries (e.g. slight threshold variations when x_0 < 0 due to negative-phase ReLU activation switching) whose angular contributions are smaller than 10^-5 rad.

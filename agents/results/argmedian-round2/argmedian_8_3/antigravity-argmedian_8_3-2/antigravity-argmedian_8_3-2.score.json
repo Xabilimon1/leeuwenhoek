@@ -1,0 +1,33 @@
+{
+  "run": "antigravity-argmedian_8_3-2",
+  "n_inputs": 1000000,
+  "seed": 20261108,
+  "weights_intact": true,
+  "explanation_present": true,
+  "twin": {
+    "ok": true,
+    "agreement": 0.999611,
+    "accuracy": 0.999664,
+    "error": null
+  },
+  "cheating": {
+    "static_hits": [],
+    "weight_literals": {
+      "found": 0,
+      "total": 96
+    },
+    "runs_without_weights": true,
+    "flagged": false
+  },
+  "estimate": {
+    "value": 0.99952,
+    "exact_accuracy": 0.9994549023497373,
+    "abs_error_points": 0.006509765026263548,
+    "sampling_error_same_compute_points": 0.0031557462117168624,
+    "beats_sampling": false
+  },
+  "model_calls": {
+    "calls": 14,
+    "inputs": 547058
+  }
+}
